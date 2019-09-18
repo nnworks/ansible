@@ -1,0 +1,9 @@
+all:
+  children:
+    server1:
+      hosts:
+        10.0.0.3:
+    server2:
+      hosts:
+        10.0.0.4:
+        

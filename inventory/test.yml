@@ -1,0 +1,5 @@
+all:
+  children:
+    server1:
+      hosts:
+        192.168.90.100:        
