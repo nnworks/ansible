@@ -1,0 +1,26 @@
+---
+  # Prepare the authentication to the targets.
+  # Needs besides the ssh  package the sshpass package 
+  # Ubuntu / Debian: sudo apt install sshpass or 
+  # OSX: brew create https://sourceforge.net/projects/sshpass/files/sshpass/1.06/sshpass-1.06.tar.gz --force
+  #      brew install sshpass
+ 
+- hosts: webserver1
+
+  vars_prompt: 
+    #- name: ansible_ssh_user
+    #  prompt: "Username for ssh to target?"
+    #  private: no
+
+    - name: ssh_pass
+      prompt: "Password for ssh to target?"
+
+  vars:
+    ssh_user: "{{ lookup('env','USER') }}"
+    ansible_ssh_user: "{{ssh_user}}"
+    ansible_ssh_pass: "{{ssh_pass}}"
+    http_port: 80
+    max_clients: 200
+
+  tasks:
+  - import_tasks: ../roles/common/tasks/copy-pub-key.yml

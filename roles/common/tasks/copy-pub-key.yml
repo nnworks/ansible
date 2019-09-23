@@ -1,0 +1,5 @@
+- name: copy public key of current user to ~/.ssh/authorized_keys of user
+  authorized_key:
+    user: "{{ ssh_user }}"
+    state: present
+    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
