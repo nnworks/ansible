@@ -1,0 +1,15 @@
+- name: Create ansible user on target system.
+
+  become: yes
+  become_user: root
+
+  vars:
+    ansible_become_pass: "{{ssh_pass}}"
+
+  user: 
+    name: ansible
+    comment: Ansible user
+    groups: sudo
+    append: no
+    create_home: yes
+    password: "{{ '1234' | password_hash('sha512') }}"

@@ -8,14 +8,12 @@
 - hosts: webserver1
 
   vars_prompt: 
-    #- name: ansible_ssh_user
-    #  prompt: "Username for ssh to target?"
-    #  private: no
-
     - name: ssh_pass
-      prompt: "Password for ssh to target?"
+      prompt: "Password for user [{{ssh_user}}] to connect to target (using ssh)?"
+      private: yes
 
   vars:
+    # current user
     ssh_user: "{{ lookup('env','USER') }}"
     ansible_ssh_user: "{{ssh_user}}"
     ansible_ssh_pass: "{{ssh_pass}}"
@@ -23,4 +21,9 @@
     max_clients: 200
 
   tasks:
-  - import_tasks: ../roles/common/tasks/copy-pub-key.yml
+    - import_tasks: ../roles/common/tasks/create-ansible-user.yml
+      register: createAnsibleUserResult
+
+    #- import_tasks: ../roles/common/tasks/copy-pub-key.yml
+    #  register: copyPubKeyResult
+

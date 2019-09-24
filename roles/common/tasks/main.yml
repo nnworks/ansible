@@ -1,3 +1,5 @@
 - name: main
-  import_tasks: copy-pub-key.yml
+  tasks:
+  -  import_tasks: copy-pub-key.yml
+  -  import_tasks: create-ansible-user.yml
   

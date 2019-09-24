@@ -1,4 +1,4 @@
-- name: copy public key of current user to ~/.ssh/authorized_keys of user
+- name: Copy public key of current user to ~/.ssh/authorized_keys of user.
   authorized_key:
     user: "{{ ssh_user }}"
     state: present
