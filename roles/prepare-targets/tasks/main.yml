@@ -1,0 +1,5 @@
+---
+
+-  import_tasks: create-ansible-user.yml
+-  import_tasks: copy-pub-key.yml
+  

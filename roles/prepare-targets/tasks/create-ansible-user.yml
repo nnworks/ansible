@@ -4,6 +4,7 @@
   become_user: root
 
   vars:
+    # sudo password is assumed to be the passwd
     ansible_become_pass: "{{ssh_pass}}"
 
   user: 
