@@ -1,9 +1,22 @@
 ---
 
-  # Prepare target for ansible authentication:
-  # - Create ansible user on target.
-  # - Copy executing user's public key to authorized_keys of ansible user
-  # After this the executing user is able to log in as ansible user using ssh key authentication 
+
+- hosts: 
+    - 127.0.0.1
+  connection: local
+
+  vars:
+    # Current user 
+    current_user: "{{ lookup('env','USER') }}"
+
+  roles:
+    - prepare-local
+
+
+# Prepare target for ansible authentication:
+# - Create ansible user on target.
+# - Copy executing user's public key to authorized_keys of ansible user
+# After this the executing user is able to log in as ansible user using ssh key authentication 
  
 - hosts: 
   - webservers
@@ -17,12 +30,17 @@
       private: yes
 
   vars:
-    # current user is used for initial ssh connection
+    # Current user is used for initial ssh connection.
     ssh_user: "{{ lookup('env','USER') }}"
+    # User to create on the target that will be used for ansible deployments.
     user_to_create: ansible
+    # Groups to add the new user to.
     user_to_create_groups: sudo
+    # ssh username / password
     ansible_user: "{{ ssh_user }}"
     ansible_ssh_pass: "{{ ssh_pass }}"
 
   roles:
     - prepare-targets
+
+    

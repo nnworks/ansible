@@ -14,6 +14,8 @@
     name: "{{ user_to_create }}"
     comment: Ansible user
     groups: "{{ user_to_create_groups }}"
+    generate_ssh_key: yes
+    force: no
     append: no
     create_home: yes
     password: "{{ '1234' | password_hash('sha512') }}"
