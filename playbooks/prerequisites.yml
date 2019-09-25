@@ -1,20 +1,28 @@
 ---
-  # Prepare the authentication to the targets.
-  # Needs besides the ssh  package the sshpass package 
-  # Ubuntu / Debian: sudo apt install sshpass or 
-  # OSX: brew create https://sourceforge.net/projects/sshpass/files/sshpass/1.06/sshpass-1.06.tar.gz --force
-  #      brew install sshpass
+
+  # Prepare target for ansible authentication:
+  # - Create ansible user on target.
+  # - Copy executing user's public key to authorized_keys of ansible user
+  # After this the executing user is able to log in as ansible user using ssh key authentication 
  
-- hosts: webserver1
+- hosts: 
+  - webservers
+
+  vars_prompt: 
+    - name: ssh_pass
+      prompt: |-
+              User [{{ ssh_user }}] will be used to connect to the targets for creating user [{{ user_to_create }}].
+              After that, the public ssh key of [{{ ssh_user }}] will be copied to the authorized_keys of user [{{ user_to_create }}].
+              Please provide the password for user [{{ ssh_user }}]
+      private: yes
 
   vars:
     # current user is used for initial ssh connection
     ssh_user: "{{ lookup('env','USER') }}"
-
-  vars_prompt: 
-    - name: ssh_pass
-      prompt: "Password for user [{{ssh_user}}] to connect to target (using ssh)?"
-      private: yes
+    user_to_create: ansible
+    user_to_create_groups: sudo
+    ansible_user: "{{ ssh_user }}"
+    ansible_ssh_pass: "{{ ssh_pass }}"
 
   roles:
     - prepare-targets

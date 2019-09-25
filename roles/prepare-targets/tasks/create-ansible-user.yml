@@ -1,16 +1,19 @@
+---
+
 - name: Create ansible user on target system.
 
+  # sudo to root to create user
   become: yes
   become_user: root
 
   vars:
-    # sudo password is assumed to be the passwd
-    ansible_become_pass: "{{ssh_pass}}"
+    ansible_become_pass: "{{ ssh_pass }}"
+
 
   user: 
-    name: ansible
+    name: "{{ user_to_create }}"
     comment: Ansible user
-    groups: sudo
+    groups: "{{ user_to_create_groups }}"
     append: no
     create_home: yes
     password: "{{ '1234' | password_hash('sha512') }}"
