@@ -1,0 +1,11 @@
+---
+
+- name: create yaml with keys and password
+  template:
+    src: templates/vault-template.yml
+    dest: vault.yml
+
+
+#- name: create vault containing the keypairs for the ansible user
+
+#  shell: ansible-vault 

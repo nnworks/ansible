@@ -1,4 +1,5 @@
 ---
 
 - import_tasks: generate-ssh-keypair.yml
+- import_tasks: create-vault.yml
   

@@ -2,21 +2,17 @@
 
 - name: create directory for keypair
   file:
-    path: ~/ansible/
+    path: "{{ keypair_location }}"
     state: directory
     mode: '0755'
 
-- name: create file for keypair
-  file:
-    path: ~/ansible/ssh
-    state: touch
-    #owner: "{{ current_user }}"
-    mode: '0755'
-
 - name: Generate SSH keypair for accessing the targets
+  vars:
+    
   openssh_keypair:
     type: rsa
     state: present
     size: 2048
-    path: ~/ansible/ssh
-    
+    path: "{{ keypair_location }}/{{ keypair_file }}"
+    owner: "{{ current_user }}"
+    mode: '0755'
