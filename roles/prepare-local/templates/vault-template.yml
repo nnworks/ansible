@@ -1,2 +1,0 @@
-ssh-priv: "{{ keypair_location }}/{{keypair_file}}"
-#ssh-pub: "{{ lookup('file',  '{{ keypair_location }}/{{keypair_file}}) }}"

@@ -1,0 +1,18 @@
+---
+
+- name: create vault yaml with keys and password
+  template:
+    src: templates/vault-template.yml
+    dest: "{{ vault_location }}"
+    owner: "{{ current_user }}"
+    mode: u=rw,g=,o=
+
+- name: encrypt vault.yml containing the keypairs for the ansible user
+  shell: ansible-vault encrypt "{{ vault_location }}" --vault-id "{{ inventory_dir | basename }}@prompt"
+  
+
+- name: remove keypair
+  file:
+    state: absent
+    path: "{{ keypair_location }}"
+  

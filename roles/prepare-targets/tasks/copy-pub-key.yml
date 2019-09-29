@@ -12,4 +12,5 @@
   authorized_key:
     user: "{{ user_to_create }}"
     state: present
-    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+    # public key of generated set
+    key: "{{ lookup('file', '{{ keypair_location }}/{{ keypair_file }}.pub') }}"

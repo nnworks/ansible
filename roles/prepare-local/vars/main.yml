@@ -1,8 +1,0 @@
----
-
-current_user: "{{ lookup('env','USER') }}"
-current_user_home: "{{ lookup('env','HOME') }}"
-keypair_location: "{{ current_user_home }}/ansible/{{ role_name }}"  
-keypair_file: "ssh"
-
-

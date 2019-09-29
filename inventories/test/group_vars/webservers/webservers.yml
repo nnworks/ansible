@@ -1,0 +1,6 @@
+---
+
+# User to create on the target that will be used for ansible deployments.
+user_to_create: ansible
+# Groups to add the new user to.
+user_to_create_groups: sudo

@@ -1,2 +1,0 @@
-ssh-priv: "bla"
-ssh-pub: "lookup('file', /home/pg63ux/ansible/prepare-local/ssh)"

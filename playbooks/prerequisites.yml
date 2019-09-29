@@ -1,41 +1,34 @@
 ---
 
-
+# Create ssh key pair
 - hosts: 
-    - 127.0.0.1
+    - local
+
+  # do not use ssh to connect to local host
   connection: local
 
   vars:
-    # Current user 
-    current_user: "{{ lookup('env','USER') }}"
-
+  
   roles:
-    - prepare-local
+    - generate-ssh-keypair
 
 
 # Prepare target for ansible authentication:
 # - Create ansible user on target.
 # - Copy executing user's public key to authorized_keys of ansible user
 # After this the executing user is able to log in as ansible user using ssh key authentication 
- 
 - hosts: 
   - webservers
 
   vars_prompt: 
-    - name: ssh_pass
+    - name: ssh_pass 
       prompt: |-
-              User [{{ ssh_user }}] will be used to connect to the targets for creating user [{{ user_to_create }}].
-              After that, the public ssh key of [{{ ssh_user }}] will be copied to the authorized_keys of user [{{ user_to_create }}].
-              Please provide the password for user [{{ ssh_user }}]
+              User [{{ lookup('env', 'USER') }}] will be used to connect to the targets for creating an ansible user.
+              After that, a newly generated the public ssh key will be copied to the authorized_keys of the ansible user.
+              Please provide the password for user [{{ lookup('env', 'USER') }}]
       private: yes
 
   vars:
-    # Current user is used for initial ssh connection.
-    ssh_user: "{{ lookup('env','USER') }}"
-    # User to create on the target that will be used for ansible deployments.
-    user_to_create: ansible
-    # Groups to add the new user to.
-    user_to_create_groups: sudo
     # ssh username / password
     ansible_user: "{{ ssh_user }}"
     ansible_ssh_pass: "{{ ssh_pass }}"
@@ -43,4 +36,15 @@
   roles:
     - prepare-targets
 
+# create vault
+- hosts: 
+    - local
+
+  # do not use ssh to connect to local host
+  connection: local
+
+  vars:
+  
+  roles:
+    - generate-ssh-vault
     
