@@ -3,6 +3,8 @@
 - hosts:
   - webservers
     
+  become: yes
+  become_user: root
 
   vars_prompt: 
     - name: ssh_pass 
@@ -14,6 +16,7 @@
     # ssh username / password
     ansible_user: "{{ ssh_user }}"
     ansible_ssh_pass: "{{ ssh_pass }}"
+    ansible_become_pass: "{{ ssh_pass }}"
     
   roles:
     - host-install-packages
