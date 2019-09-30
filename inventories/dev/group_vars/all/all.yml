@@ -1,0 +1,17 @@
+---
+
+# current inventory 
+current_inventory: "{{ inventory_dir }}"
+
+# Current user is used for initial ssh connection.
+current_user: "{{ lookup('env','USER') }}"
+current_user_home: "{{ lookup('env','HOME') }}"
+ssh_user: "{{ current_user }}"
+
+# local keypair settings
+keypair_location: "{{ current_user_home }}/ansible/keypairs/{{ inventory_dir | basename }}"
+keypair_file: "ssh-key"
+
+# vault location
+vault_location: "{{ inventory_dir}}/group_vars/all/vault.yml"
+vault_id: ""
