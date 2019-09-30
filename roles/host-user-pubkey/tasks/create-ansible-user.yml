@@ -23,3 +23,5 @@
     append: no
     create_home: yes
     password: "{{ '1234' | password_hash('sha512') }}"
+
+  register: create_user_result

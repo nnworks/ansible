@@ -1,6 +1,6 @@
 ---
 
-# Create ssh key pair
+# warnCreate ssh key pair
 - hosts: 
     - local
 
@@ -12,6 +12,18 @@
   roles:
     - generate-ssh-keypair
 
+
+# Create ssh key pair
+- hosts: 
+    - local
+
+  # do not use ssh to connect to local host
+  connection: local
+
+  vars:
+  
+  roles:
+    - generate-ssh-keypair
 
 # Prepare target for ansible authentication:
 # - Create ansible user on target.
@@ -34,7 +46,7 @@
     ansible_ssh_pass: "{{ ssh_pass }}"
 
   roles:
-    - prepare-targets
+    - host-user-pubkey
 
 # create vault
 - hosts: 

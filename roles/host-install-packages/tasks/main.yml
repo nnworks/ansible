@@ -1,0 +1,6 @@
+---
+
+#- import_tasks: aptitude.yml
+- import_tasks: python3.yml
+#- import_tasks: docker.yml
+  

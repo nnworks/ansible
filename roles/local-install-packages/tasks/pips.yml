@@ -1,0 +1,16 @@
+---
+
+- name: passlib
+  pip:
+    name: passlib
+    state: present
+
+- name: docker
+  pip:
+    name: docker
+    state: present    
+
+- name: docker-compose
+  pip:
+    name: docker-compose
+    state: present

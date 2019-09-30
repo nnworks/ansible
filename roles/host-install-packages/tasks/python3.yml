@@ -1,0 +1,12 @@
+---
+
+
+- name: install python on remote host
+
+  become: yes
+  become_user: root
+
+  vars:
+    ansible_become_pass: "{{ ssh_pass }}"
+
+  raw: 'sudo apt-get -y install python3'

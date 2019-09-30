@@ -21,3 +21,4 @@
     path: "{{ keypair_location }}/{{ keypair_file }}"
     owner: "{{ current_user }}"
     mode: u=rw,g=,o=
+  

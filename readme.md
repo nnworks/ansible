@@ -2,11 +2,28 @@
 ## Ansible playbooks
 
 
+
 # prerequisites for running ansible playbooks:
 
-**passlib:**
+## System (local):
 
-pip install --user passlib
+**Python preferably v3**
+
+
+**setuptools**
+
+sudo apt-get install python-setuptools
+
+For osx:
+
+`easy_install setuptools`
+
+**pip**
+sudo apt-get install python-pip
+
+For osx:
+
+`easy_install pip`
 
 **sshpass:**
 
@@ -22,6 +39,20 @@ or
      `brew install sshpass`
  
 
+## Python modules:
+(or run playbook setup-local.yml)
+
+**passlib (local):**
+
+pip install --user passlib
+
+**docker (host):**
+
+pip install --user docker
+
+**docker-compose (host):**
+
+pip install --user docker-compose
 
 
 

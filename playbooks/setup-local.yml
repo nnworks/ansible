@@ -1,0 +1,9 @@
+---
+
+- hosts:
+  - webservers
+    
+  vars:
+  
+  roles:
+    - local-install-packages

@@ -14,3 +14,5 @@
     state: present
     # public key of generated set
     key: "{{ lookup('file', '{{ keypair_location }}/{{ keypair_file }}.pub') }}"
+    
+  when: create_user_result is succeeded

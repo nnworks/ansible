@@ -1,0 +1,19 @@
+---
+
+- hosts:
+  - webservers
+    
+
+  vars_prompt: 
+    - name: ssh_pass 
+      prompt: |-
+              Please provide the password for user [{{ lookup('env', 'USER') }}]
+      private: yes
+
+  vars:
+    # ssh username / password
+    ansible_user: "{{ ssh_user }}"
+    ansible_ssh_pass: "{{ ssh_pass }}"
+    
+  roles:
+    - host-install-packages
