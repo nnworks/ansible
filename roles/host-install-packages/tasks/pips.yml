@@ -1,11 +1,11 @@
 ---
 
-- name: docker
+- name: docker-pip
   pip:
     name: docker
     state: present    
 
-- name: docker-compose
+- name: docker-compose-pip
   pip:
     name: docker-compose
     state: present
