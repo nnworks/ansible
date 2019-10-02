@@ -9,7 +9,6 @@
 
 **Python preferably v3**
 
-
 **setuptools**
 
 sudo apt-get install python-setuptools
@@ -46,13 +45,17 @@ or
 
 pip install --user passlib
 
-**docker (host):**
-
-pip install --user docker
-
-**docker-compose (host):**
-
-pip install --user docker-compose
 
 
 
+## Remote host:
+
+**sshd**
+
+**Proxy**
+If needed a proxy should be installed and configured.
+
+(http_proxy, https_proxy)
+
+**CA certificates**
+If needed additional CA certificates should be installed and configured.

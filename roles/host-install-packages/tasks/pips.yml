@@ -1,11 +1,11 @@
 ---
 
-- name: docker-pip
+- name: Install docker-pip
   pip:
     name: docker
     state: present    
-
-- name: docker-compose-pip
+    
+- name: Install docker-compose-pip
   pip:
     name: docker-compose
     state: present

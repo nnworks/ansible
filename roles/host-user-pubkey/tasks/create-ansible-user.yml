@@ -1,9 +1,5 @@
 ---
 
-- name: dsafasdf
-  debug:
-    msg: "{{ ssh_user }}"
-
 - name: Create ansible user on target system.
 
   # sudo to root to create user
@@ -15,9 +11,9 @@
 
 
   user: 
-    name: "{{ user_to_create }}"
+    name: "{{ deployment_user }}"
     comment: Ansible user
-    groups: "{{ user_to_create_groups }}"
+    groups: "{{ deployment_user_groups }}"
     generate_ssh_key: yes
     force: no
     append: no

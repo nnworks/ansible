@@ -1,7 +1,6 @@
 ---
 
-- name: create directory for keypair
-
+- name: Create directory for keypair
   vars:
 
   file:
@@ -10,7 +9,6 @@
     mode: '0755'
 
 - name: Generate SSH keypair for accessing the targets
-  
   vars:
     
   openssh_keypair:

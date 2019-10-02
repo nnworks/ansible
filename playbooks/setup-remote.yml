@@ -11,6 +11,7 @@
       prompt: |-
               Please provide the password for user [{{ lookup('env', 'USER') }}]
       private: yes
+      when: ssh_pass is undefined
 
   vars:
     # ssh username / password

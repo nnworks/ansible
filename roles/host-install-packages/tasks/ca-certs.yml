@@ -1,0 +1,23 @@
+---
+
+- name: Check whether CA cert directory is present
+  file: 
+    state: directory
+    path: /usr/local/share/ca-certificates
+  when: ca_certs is defined
+
+- name: Create ansible directory in ca-certificates directory
+  file:
+    path: "/usr/local/share/ca-certificates/ansible"
+    state: directory
+    mode: '0755'
+  when: ca_certs is defined
+
+- name: Install CA certificates
+  copy: src="{{ item }}" dest="/usr/local/share/ca-certificates/ansible/{{ item | basename }}"
+  loop: "{{ ca_certs }}"
+  when: ca_certs is defined
+
+- name: Update certificate index
+  shell: /usr/sbin/update-ca-certificates
+  when: ca_certs is defined
