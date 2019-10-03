@@ -1,0 +1,15 @@
+---
+
+- name: Update and upgrade
+  apt:
+    autoclean: yes
+    autoremove: yes
+    update_cache: yes
+    upgrade: "yes"
+  register: result
+
+- name: Reboot server if an upgrade was needed, and wait until it is up again.
+  reboot:
+    msg: "Reboot after upgrade"
+  when: result.changed == true
+    

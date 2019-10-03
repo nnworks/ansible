@@ -1,5 +1,6 @@
 ---
 
+- import_tasks: upgrade.yml
 - import_tasks: ca-certs.yml
 - import_tasks: python3-base.yml
 - import_tasks: aptitude.yml

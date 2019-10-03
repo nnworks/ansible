@@ -3,7 +3,7 @@
 - name: Install prerequisites
   apt:
     name: ['apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common']
-    update_cache: yes
+    update_cache: no
 
 - name: Add Docker GPG apt Key
   apt_key:
@@ -21,12 +21,12 @@
 
 - name: Install docker-ce
   apt: 
-    update_cache: yes
+    update_cache: no
     name: docker-ce
     state: latest
 
 - name: Install docker-compose
   apt: 
-    update_cache: yes
+    update_cache: no
     name: docker-ce
     state: latest

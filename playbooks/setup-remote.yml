@@ -20,4 +20,4 @@
     ansible_become_pass: "{{ ssh_pass }}"
     
   roles:
-    - host-install-packages
+    - host-install-base
