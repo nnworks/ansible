@@ -6,4 +6,6 @@ deployment_user: ansible
 deployment_user_groups: sudo
 
 # CA certificates to copy to host (if needed)
-#ca_certs: ["~/ansible/crt/abc.crt", "~/ansible/crt/fgh.crt"]
+ca_certs_dir:  "{{ inventory_dir }}/../../resources/{{ inventory_dir | basename }}/certs"
+ca_certs: "{{ query('fileglob', ca_certs_dir + '/*.crt') }}"
+

@@ -17,8 +17,12 @@ For osx:
 
 `easy_install setuptools`
 
-**pip**
+**pip or pip3**
 sudo apt-get install python-pip
+
+or
+
+sudo apt-get install python3-pip
 
 For osx:
 
@@ -59,3 +63,7 @@ If needed a proxy should be installed and configured.
 
 **CA certificates**
 If needed additional CA certificates should be installed and configured.
+
+
+## CA certificates
+If other than standard CA certificates need to be installed, put them (in crt format with extention .crt) in the **certs** folder in the inventories/[develop|test|production] directory.
