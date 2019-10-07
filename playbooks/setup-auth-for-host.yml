@@ -58,5 +58,5 @@
   vars:
   
   roles:
-    - generate-ssh-vault
+    - generate-vault
     

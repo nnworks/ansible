@@ -1,0 +1,13 @@
+---
+
+# warnCreate ssh key pair
+- hosts: 
+    - local
+
+  # do not use ssh to connect to local host
+  connection: local
+
+  vars:
+  
+  roles:
+    - local-setup-host-keys

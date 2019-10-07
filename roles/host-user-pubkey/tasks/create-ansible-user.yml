@@ -9,7 +9,6 @@
   vars:
     ansible_become_pass: "{{ ssh_pass }}"
 
-
   user: 
     name: "{{ deployment_user }}"
     comment: Ansible user

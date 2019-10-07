@@ -1,16 +1,12 @@
 ---
 
 - name: Create directory for keypair
-  vars:
-
   file:
     path: "{{ keypair_location }}"
     state: directory
-    mode: '0755'
+    mode: u=rwx,g=,o=
 
 - name: Generate SSH keypair for accessing the targets
-  vars:
-    
   openssh_keypair:
     type: rsa
     state: present

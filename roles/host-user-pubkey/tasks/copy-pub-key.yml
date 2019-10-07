@@ -16,3 +16,4 @@
     key: "{{ lookup('file', '{{ keypair_location }}/{{ keypair_file }}.pub') }}"
     
   when: create_user_result is succeeded
+  register: copy_pub_key_result

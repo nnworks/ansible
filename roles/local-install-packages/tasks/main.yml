@@ -1,5 +1,4 @@
 ---
 
-- import_tasks: aptitude.yml
-- import_tasks: docker.yml
+- import_tasks: pips.yml
   

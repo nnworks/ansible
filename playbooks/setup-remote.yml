@@ -6,18 +6,11 @@
   become: yes
   become_user: root
 
-  vars_prompt: 
-    - name: ssh_pass 
-      prompt: |-
-              Please provide the password for user [{{ lookup('env', 'USER') }}]
-      private: yes
-      when: ssh_pass is undefined
-
   vars:
     # ssh username / password
-    ansible_user: "{{ ssh_user }}"
-    ansible_ssh_pass: "{{ ssh_pass }}"
-    ansible_become_pass: "{{ ssh_pass }}"
+    ansible_user: "{{ deployment_user }}"
+    ansible_ssh_key_file: "{{ priv_key_from_vault_file }}"
+    ansible_become_pass: "{{ sudo_pass }}"
     
   roles:
     - host-install-base

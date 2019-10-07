@@ -1,0 +1,14 @@
+restructure: 
+
+- create ssh vault
+- setup-local (needs ssh vault pw, creates local priv key for ansible user)
+- create remote user (provide secrets vault pw)
+- setup remote (needs secrets vault pw)
+
+ssh vault: local
+secrets vault: servers
+
+
+is it possible to remove ssh login for ansible user alone?
+
+- install nginx, db, wordpress etc...

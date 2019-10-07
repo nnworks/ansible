@@ -51,7 +51,6 @@ pip install --user passlib
 
 
 
-
 ## Remote host:
 
 **sshd**
@@ -67,3 +66,13 @@ If needed additional CA certificates should be installed and configured.
 
 ## CA certificates
 If other than standard CA certificates need to be installed, put them (in crt format with extention .crt) in the **certs** folder in the inventories/[develop|test|production] directory.
+
+**LVM2**
+
+
+
+## Help, it doesn't work
+
+Sometimes after changing hosts in one of the hosts files, I experienced ansible-playbook to hang on gathering facts. What helped me was removing the .ansible folder in my home directory:
+
+rm -rf ~/.ansible

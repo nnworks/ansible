@@ -1,0 +1,4 @@
+---
+# vault location
+vault_location: "{{ inventory_dir}}/group_vars/all/vault.yml"
+vault_id: "{{ inventory_dir | basename }}"

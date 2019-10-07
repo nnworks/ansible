@@ -1,0 +1,14 @@
+---
+
+- name: Create directory for keypair
+  file:
+    path: "{{ keypair_location }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: Create priv key
+  template:
+    src: templates/priv-key-template.yml
+    dest: "{{ priv_key_from_vault_file }}"
+    owner: "{{ current_user }}"
+    mode: u=rw,g=,o=
