@@ -13,4 +13,4 @@ keypair_location: "{{ current_user_home }}/ansible/keypairs/{{ inventory_dir | b
 keypair_file: "ssh-key"
 
 # private key location for key authentication ()
-priv_key_from_vault_file: "{{ keypair_location }}/ssh-priv-key-from-vault"
+ssh_key_file: "{{ keypair_location }}/ssh-key-from-vault"

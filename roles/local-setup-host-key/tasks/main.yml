@@ -1,4 +1,5 @@
 ---
 
 - import_tasks: create-priv-key.yml  
+- import_tasks: create-pub-key.yml  
   

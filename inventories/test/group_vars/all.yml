@@ -12,6 +12,3 @@ ssh_user: "{{ current_user }}"
 keypair_location: "{{ current_user_home }}/ansible/keypairs/{{ inventory_dir | basename }}"
 keypair_file: "ssh-key"
 
-# vault location
-vault_location: "{{ inventory_dir}}/group_vars/all/vault.yml"
-vault_id: ""

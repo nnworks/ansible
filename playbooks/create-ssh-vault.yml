@@ -1,6 +1,6 @@
 ---
 
-# warnCreate ssh key pair
+# Create ssh key pair and put it in a vault.
 - hosts: 
     - local
 
@@ -10,4 +10,4 @@
   vars:
   
   roles:
-    - local-setup-host-keys
+    - create-ssh-vault

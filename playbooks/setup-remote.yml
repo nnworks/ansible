@@ -9,8 +9,8 @@
   vars:
     # ssh username / password
     ansible_user: "{{ deployment_user }}"
-    ansible_ssh_key_file: "{{ priv_key_from_vault_file }}"
-    ansible_become_pass: "{{ sudo_pass }}"
+    ansible_ssh_key_file: "{{ ssh_key_file }}.priv"
+    ansible_become_pass: "{{ deployment_user_pass }}"
     
   roles:
     - host-install-base

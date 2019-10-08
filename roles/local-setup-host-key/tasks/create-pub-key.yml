@@ -1,0 +1,14 @@
+---
+
+- name: Create directory for keypair
+  file:
+    path: "{{ keypair_location }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: Create priv key
+  template:
+    src: templates/pub-key-template.yml
+    dest: "{{ ssh_key_file }}.pub"
+    owner: "{{ current_user }}"
+    mode: u=rw,g=,o=

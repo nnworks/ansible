@@ -13,7 +13,7 @@
     user: "{{ deployment_user }}"
     state: present
     # public key of generated set
-    key: "{{ lookup('file', '{{ keypair_location }}/{{ keypair_file }}.pub') }}"
+    key: "{{ lookup('file', '{{ ssh_key_file }}.pub') }}"
     
   when: create_user_result is succeeded
   register: copy_pub_key_result

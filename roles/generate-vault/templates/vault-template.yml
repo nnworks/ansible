@@ -1,3 +1,0 @@
-vault_ssh_priv: "{{ lookup('file',  '{{ keypair_location }}/{{keypair_file}}') }}"
-vault_ssh_pub: "{{ lookup('file',  '{{ keypair_location }}/{{keypair_file}}.pub') }}"
-vault_sudo_pass: "1234"
