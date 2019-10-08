@@ -8,6 +8,9 @@ current_user: "{{ lookup('env','USER') }}"
 current_user_home: "{{ lookup('env','HOME') }}"
 ssh_user: "{{ current_user }}"
 
-# local keypair settings
+# keypair settings (key will only be here during setup of authentication for host)
 keypair_location: "{{ current_user_home }}/ansible/keypairs/{{ inventory_dir | basename }}"
 keypair_file: "ssh-key"
+
+# private key location for key authentication ()
+ssh_key_file: "{{ keypair_location }}/ssh-key-from-vault"

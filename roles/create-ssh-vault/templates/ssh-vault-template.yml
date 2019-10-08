@@ -1,4 +1,3 @@
-vault_ssh_priv: |-
-  {{ vault_ssh_priv }}
+vault_ssh_priv: > "{{ vault_ssh_priv }}"
 vault_ssh_pub: |-
   {{ vault_ssh_pub }}

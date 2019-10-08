@@ -1,0 +1,2 @@
+# value from vault (if present)
+deployment_user_pass: "{{vault_deployment_user_pass}}"
