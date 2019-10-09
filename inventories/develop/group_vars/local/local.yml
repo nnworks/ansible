@@ -1,10 +1,10 @@
 ---
 # ssh vault location
-ssh_vault_location: "{{ inventory_dir}}/group_vars/local/vault.yml"
+ssh_vault_location: "{{ inventory_dir}}/group_vars/local/ssh-vault.yml"
 ssh_vault_id: "{{ inventory_dir | basename }}-ssh"
 
 # ssh vault location
-secrets_vault_location: "{{ inventory_dir}}/group_vars/webservers/vault.yml"
+secrets_vault_location: "{{ inventory_dir}}/group_vars/webservers/secrets-vault.yml"
 secrets_vault_id: "{{ inventory_dir | basename }}-secrets"
 
 # password for the ansible user (used for sudo lateron).
