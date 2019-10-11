@@ -6,5 +6,6 @@
 - import_tasks: python3-base.yml
 - import_tasks: python3-other.yml
 - import_tasks: pips.yml
+- import_tasks: lvm2.yml
 - import_tasks: docker.yml
   
