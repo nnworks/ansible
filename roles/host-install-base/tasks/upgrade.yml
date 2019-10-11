@@ -7,9 +7,5 @@
     update_cache: yes
     upgrade: "yes"
   register: result
+  notify: Reboot server
 
-- name: Reboot server if an upgrade was needed, and wait until it is up again.
-  reboot:
-    msg: "Reboot after upgrade"
-  when: result.changed == true
-    

@@ -1,4 +1,14 @@
 ---
 
-- name: restart sshd
-  service: name={{ sshd }} state=restarted
+# handler to restart sshd
+- name: Restart sshd
+
+  vars:
+    # sudo to ansible user to copy public key into authorized_keys
+    ansible_become: yes
+    ansible_become_user: root
+    ansible_become_pass: "{{ ssh_pass }}"    
+
+  systemd: 
+    name: "{{ ssh_service }}"
+    state: restarted

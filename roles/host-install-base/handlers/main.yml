@@ -1,0 +1,8 @@
+---
+
+# Reboot the server
+- name: Reboot server
+  reboot:
+    msg: "Reboot after upgrade"
+  when: result.changed == true
+    

@@ -1,0 +1,13 @@
+---
+
+# User to create on the target that will be used for ansible deployments.
+deployment_user: ansible
+# Groups to add the new user to.
+deployment_user_groups: sudo
+
+# CA certificates to copy to host (if needed)
+ca_certs_dir:  "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}/certs"
+ca_certs: "{{ query('fileglob', ca_certs_dir + '/*.crt') }}"
+
+# SSH service name
+ssh_service: sshs

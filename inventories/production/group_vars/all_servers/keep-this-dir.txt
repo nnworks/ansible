@@ -1,0 +1,1 @@
+Please keep this dir, it is needed for vars for all hosts except for the localhost.

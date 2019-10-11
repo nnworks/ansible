@@ -1,14 +1,26 @@
 ---
 
+- name: Check presence of files ssh-vault
+  stat:
+    path: "{{ ssh_vault_location }}"
+  register: ssh_vault_stat
+
+- name: File exists?
+  debug: 
+    msg: "{{ secrets_vault_location }} already exists, this one will be used."
+  when: ssh_vault_stat.stat.exists == true
+
 - name: Create vault yaml with keys
   template:
     src: templates/ssh-vault-template.yml
     dest: "{{ ssh_vault_location }}"
     owner: "{{ current_user }}"
     mode: u=rw,g=,o=
+  when: ssh_vault_stat.stat.exists == false
 
 - name: Encrypt vault.yml containing the keypairs for the ansible user
   shell: ansible-vault encrypt "{{ ssh_vault_location }}" --vault-id "{{ ssh_vault_id }}@prompt"
+  when: ssh_vault_stat.stat.exists == false
   
 
   

@@ -9,7 +9,8 @@
   vars:
     # ssh username / password
     ansible_user: "{{ deployment_user }}"
-    ansible_ssh_private_key_file: "{{ ssh_key_file }}.priv"
+    ansible_ssh_private_key_file: "{{ ssh_key_file_from_vault }}.priv"
+    
     ansible_become_pass: "{{ deployment_user_pass }}"
     
   roles:

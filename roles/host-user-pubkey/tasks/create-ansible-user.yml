@@ -2,12 +2,11 @@
 
 - name: Create ansible user on target system.
 
-  # sudo to root to create user
-  become: yes
-  become_user: root
-
   vars:
-    ansible_become_pass: "{{ ssh_pass }}"
+    # sudo to ansible user to copy public key into authorized_keys
+    ansible_become: yes
+    ansible_become_user: root
+    ansible_become_pass: "{{ ssh_pass }}"    
 
   user: 
     name: "{{ deployment_user }}"
@@ -17,6 +16,7 @@
     force: no
     append: no
     create_home: yes
+    shell: /bin/bash
     update_password: always
     password: "{{ deployment_user_pass | password_hash('sha512') }}"
 

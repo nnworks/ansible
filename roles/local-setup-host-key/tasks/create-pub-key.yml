@@ -9,6 +9,6 @@
 - name: Create priv key
   template:
     src: templates/pub-key-template.yml
-    dest: "{{ ssh_key_file }}.pub"
+    dest: "{{ ssh_key_file_from_vault }}.pub"
     owner: "{{ current_user }}"
     mode: u=rw,g=,o=

@@ -2,18 +2,17 @@
 
 - name: Copy public key of current user to ~/.ssh/authorized_keys of user.
   
-  # sudo to ansible user to copy public key into authorized_keys
-  become: yes
-  become_user: "{{ deployment_user }}"
-
   vars:
-    ansible_become_pass: "{{ ssh_pass }}"
+    # sudo to ansible user to copy public key into authorized_keys
+    ansible_become: yes
+    ansible_become_user: "{{ deployment_user }}"
+    ansible_become_pass: "{{ ssh_pass }}"    
 
   authorized_key:
     user: "{{ deployment_user }}"
     state: present
     # public key of generated set
-    key: "{{ lookup('file', '{{ ssh_key_file }}.pub') }}"
+    key: "{{ lookup('file', '{{ ssh_key_file_from_vault }}.pub') }}"
     
   when: create_user_result is succeeded
   register: copy_pub_key_result
