@@ -1,0 +1,6 @@
+---
+
+- import_tasks: docker.yml
+- import_tasks: lvm2.yml
+- import_tasks: config-docker-lvm.yml
+

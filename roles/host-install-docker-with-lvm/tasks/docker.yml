@@ -2,7 +2,7 @@
 
 - name: Install prerequisites
   apt:
-    name: ['apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common']
+    name: ['apt-transport-https', 'curl', 'software-properties-common']
     update_cache: no
 
 - name: Add Docker GPG apt Key
@@ -30,3 +30,7 @@
     update_cache: no
     name: docker-ce
     state: latest
+
+
+
+

@@ -1,5 +1,10 @@
 ---
 
+- name: Install CA certificates
+  apt:
+    name: ['ca-certificates']
+    update_cache: no
+
 - name: Check whether CA cert directory is present
   file: 
     state: directory
