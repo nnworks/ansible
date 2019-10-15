@@ -22,5 +22,5 @@
     ansible_ssh_pass: "{{ ssh_pass }}"
 
   roles:
-    - host-user-pubkey
+    - user-pubkey
 
