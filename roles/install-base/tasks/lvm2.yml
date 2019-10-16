@@ -1,0 +1,11 @@
+---
+
+
+- name: Install lvm2
+  apt:
+    name: lvm2
+    state: latest 
+    update_cache: no 
+
+# Create volume groups
+# Create cs_volumes in the groups:

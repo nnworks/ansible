@@ -11,3 +11,41 @@ ca_certs: "{{ query('fileglob', ca_certs_dir + '/*.crt') }}"
 
 # SSH service name
 ssh_service: sshs
+
+# LVM related vars
+lvm:
+  - volume_groups: 
+    - ubuntu:
+      name: ubuntu-vg
+      physical_volumes: ["/dev/sda3"]
+      size: 5G
+      volumes:
+        - ubuntu_main:
+          name: ubuntu-lv
+          size: 4G
+
+    - docker:
+      name: docker-vg
+      physical_volumes: ["/dev/sda3"]
+      size: 1G
+      volumes:
+        - ubuntu_storage:
+          name: docker-storage-lv
+          size: 1G
+
+    - docker_data:
+      name: docker-data-vg
+      physical_volumes: ["/dev/sda3"]
+      size: 2G
+      # volumes will be created by the playbooks for the different containers
+    
+
+# docker hints
+docker:
+  - storage:
+    volume: {{ lvm.volume_groups.docker_data.volumes.ubuntu_storage.name }}
+    mount_dir:     
+  - data:
+    volume_group: {{ lvm.volume_groups.docker_data.name }}
+
+    

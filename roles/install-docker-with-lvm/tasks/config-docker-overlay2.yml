@@ -1,0 +1,7 @@
+---
+
+# check whether docker staorage lv is created, else fail
+# shutdown docker,
+# mount docker storage lv
+# configure docker for overlay2
+# startup docker again
