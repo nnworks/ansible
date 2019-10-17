@@ -14,7 +14,7 @@ ssh_service: sshs
 
 # LVM related vars
 lvm:
-  - volume_groups: 
+  volume_groups: 
     - ubuntu:
       name: ubuntu-vg
       physical_volumes: ["/dev/sda3"]
@@ -26,26 +26,25 @@ lvm:
 
     - docker:
       name: docker-vg
-      physical_volumes: ["/dev/sda3"]
-      size: 1G
+      physical_volumes: ["/dev/sdb"]
+      size: 2G
       volumes:
         - ubuntu_storage:
           name: docker-storage-lv
-          size: 1G
+          size: 100%FREE
 
     - docker_data:
       name: docker-data-vg
-      physical_volumes: ["/dev/sda3"]
+      physical_volumes: ["/dev/sdc"]
       size: 2G
-      # volumes will be created by the playbooks for the different containers
+      # volumes:
+      #   volumes will be created by the playbooks for the different containers
     
 
 # docker hints
 docker:
-  - storage:
-    volume: {{ lvm.volume_groups.docker_data.volumes.ubuntu_storage.name }}
-    mount_dir:     
-  - data:
-    volume_group: {{ lvm.volume_groups.docker_data.name }}
-
-    
+  storage:
+    volume: "{{ lvm.volume_groups[0].volumes[0].name }}"
+    mount_dir:   
+  #data:
+  #  volume_group: "{{ lvm.volume_groups['docker_data'].name }}"

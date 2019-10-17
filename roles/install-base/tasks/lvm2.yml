@@ -1,11 +1,33 @@
 ---
 
-
-- name: Install lvm2
-  apt:
-    name: lvm2
-    state: latest 
-    update_cache: no 
+#- name: Install lvm2
+#  apt:
+#    name: lvm2
+#    state: latest 
+#    update_cache: no 
 
 # Create volume groups
 # Create cs_volumes in the groups:
+
+
+- name: Create volume groups
+  lvg:
+    vg: "{{ item.name }}"
+    pvs: "{{ item.physical_volumes }}"
+    pesize: 4M
+    state: present
+  loop: "{{ lvm.volume_groups }}"
+    
+- name: Create logical volumes
+  lvol:
+    vg: "{{ item.0.name }}"
+    lv: "{{ item.1.name }}"
+    size: "{{ item.1.size }}"
+    shrink: "{{ 'no' if item.1.size == '100%FREE' else 'yes' }}"
+    state: present
+  register: lvdata
+  loop: "{{ lvm.volume_groups | subelements('volumes', { 'skip_missing': true })}}"
+
+- name: test
+  debug: 
+    msg: "{{ docker.storage.volume }}"
