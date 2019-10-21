@@ -15,4 +15,4 @@
     
   roles:
     - install-base
-#    - install-docker-with-lvm
+    - install-docker-with-lvm

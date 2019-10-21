@@ -9,15 +9,25 @@
 # Create volume groups
 # Create cs_volumes in the groups:
 
-
 - name: Create volume groups
   lvg:
-    vg: "{{ item.name }}"
-    pvs: "{{ item.physical_volumes }}"
+    vg: "{{ item.value.name }}"
+    pvs: "{{ item.value.physical_volumes }}"
     pesize: 4M
     state: present
-  loop: "{{ lvm.volume_groups }}"
+  loop: "{{ lvm.volume_groups | dict2items }}"
     
+# create list of volumes to create
+- set_fact:
+    volumes_list: "{{ volumes_list | default({}) | combine({ item.key: item.value.volumes }) }}"
+  loop: "{{ lvm.volume_groups | dict2items }}"
+
+- name : test
+  debug:
+    msg: "{{ item }}"
+  loop: "{{ volumes_list | dict2items }}"
+
+
 - name: Create logical volumes
   lvol:
     vg: "{{ item.0.name }}"
@@ -26,7 +36,8 @@
     shrink: "{{ 'no' if item.1.size == '100%FREE' else 'yes' }}"
     state: present
   register: lvdata
-  loop: "{{ lvm.volume_groups | subelements('volumes', { 'skip_missing': true })}}"
+  loop: "{{ volumes_list | dict2items }}"
+
 
 - name: test
   debug: 

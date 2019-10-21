@@ -1,5 +1,13 @@
 ---
 
+- name: test
+  debug:
+    msg: "{{ docker.storage.volume }}"
+
+- name: test 2
+  debug:
+    msg: "{{ lvm.volume_groups }}"
+
 # check whether docker staorage lv is created, else fail
 # shutdown docker,
 # mount docker storage lv
