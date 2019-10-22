@@ -95,7 +95,7 @@ If other than standard CA certificates need to be installed, put them (in crt fo
 - Copy the public key from ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.pub to the authorized_keys set of the ansible user.
 - **TODO:** Disables logging in with username / password for the ansible user.
 
-After this step, you can login to the hosts with `ssh ansible@<host> -i ~/ansible/keypairs/develop/ssh-key-from-vault.priv` 
+After this step, you can login to the hosts with `ssh ansible@<host> -i ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.priv` 
 
 `ansible-playbook playbooks/setup-remote.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`
 
