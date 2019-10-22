@@ -18,7 +18,7 @@
     mode: '0755'
   when: ca_certs is defined
 
-- name: Install CA certificates
+- name: Install custom CA certificates
   copy: src="{{ item }}" dest="/usr/local/share/ca-certificates/ansible/{{ item | basename }}"
   loop: "{{ ca_certs }}"
   when: ca_certs is defined

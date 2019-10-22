@@ -11,34 +11,25 @@
 
 - name: Create volume groups
   lvg:
-    vg: "{{ item.value.name }}"
-    pvs: "{{ item.value.physical_volumes }}"
+    vg: "{{ item.name }}"
+    pvs: "{{ item.physical_volumes }}"
     pesize: 4M
     state: present
-  loop: "{{ lvm.volume_groups | dict2items }}"
+  # all volume groups
+  loop: "{{ lvm.volume_groups }}"
     
-# create list of volumes to create
-- set_fact:
-    volumes_list: "{{ volumes_list | default({}) | combine({ item.key: item.value.volumes }) }}"
-  loop: "{{ lvm.volume_groups | dict2items }}"
-
-- name : test
-  debug:
-    msg: "{{ item }}"
-  loop: "{{ volumes_list | dict2items }}"
-
-
 - name: Create logical volumes
   lvol:
-    vg: "{{ item.0.name }}"
-    lv: "{{ item.1.name }}"
-    size: "{{ item.1.size }}"
-    shrink: "{{ 'no' if item.1.size == '100%FREE' else 'yes' }}"
+    vg: "{{ item[0].name }}"
+    lv: "{{ item[1].name }}"
+    size: "{{ item[1].size }}"
+    active: yes
+    shrink: "{{ 'no' if item[1].size == '100%FREE' else 'yes' }}"
     state: present
   register: lvdata
-  loop: "{{ volumes_list | dict2items }}"
+  # all volumes in the volumes groups
+  loop: "{{ lvm.volume_groups | subelements('volumes', skip_missing = True) }}"
 
-
-- name: test
-  debug: 
-    msg: "{{ docker.storage.volume }}"
+- name: lvdata
+  debug:
+    msg: "{{ lvdata }}"

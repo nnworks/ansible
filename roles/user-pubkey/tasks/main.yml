@@ -2,4 +2,4 @@
 
 - import_tasks: create-ansible-user.yml
 - import_tasks: copy-pub-key.yml
-- import_tasks: disable-password-login.yml
+- import_tasks: sshd-disable-password-login.yml

@@ -1,15 +1,79 @@
 ---
 
-- name: test
-  debug:
-    msg: "{{ docker.storage.volume }}"
+# Shutdown docker
+- name: Stop docker service
+  systemd:
+    name: docker
+    state: stopped
 
-- name: test 2
-  debug:
-    msg: "{{ lvm.volume_groups }}"
+# Create mount point for docker storage lv
+- name: Create mount directory for docker storage
+  file:
+    path: "{{ docker.storage.mount_dir }}"
+    state: directory
+    mode: u=rwx,g=,o=
 
-# check whether docker staorage lv is created, else fail
-# shutdown docker,
-# mount docker storage lv
-# configure docker for overlay2
-# startup docker again
+# Format logical volume
+- name: Format volume for docker storage
+  filesystem:
+    fstype: xfs
+    opts: -n ftype=1
+    dev: "/dev/{{ docker.storage.volume_group }}/{{ docker.storage.logical_volume }}"
+
+# Mount logical volume
+- name: "Mount {{ docker.storage.mount_dir }}"
+  mount:
+    path: "{{ docker.storage.mount_dir }}"
+    src: "/dev/{{ docker.storage.volume_group }}/{{ docker.storage.logical_volume }}"
+    fstype: xfs
+    opts: defaults
+    state: mounted
+
+# Move /var/lib/docker to /var/lob/docker.prev
+- name: stat /var/lib/docker
+  stat: 
+    path: /var/lib/docker
+  register: var_lib_docker_stat
+
+- name: Move /var/lib/docker to /var/lib/docker.prev
+  command: mv /var/lib/docker /var/lib/docker.prev
+  when: var_lib_docker_stat.stat.exists
+
+# symbolic link var_lib_docker_stat
+- name: "Create symbolic link from /var/lib/docker to {{ docker.storage.mount_dir }}"
+  file:
+    src: "{{ docker.storage.mount_dir }}"
+    dest: /var/lib/docker
+    owner: root
+    group: root
+    state: link
+    mode: u=rwx,g=x,o=x
+
+
+# Configure docker for overlay2
+- name: create /etc/docker/daemon.json is not there yet
+  file:
+    path: /etc/docker/daemon.json
+    state: file
+    mode: u=rwx,g=,o=
+
+- name: Load daemon.json
+  slurp:
+    src: /etc/docker/daemon.json
+  register: daemon_json
+
+- name: Append overlay2 storage-driver
+  set_fact:
+    daemon_json: "{{ daemon_json.content | b64decode | default('{}') | from_json | combine({ 'storage-driver': 'overlay2' }) }}"
+
+- name: Write daemon.json
+  copy: 
+    content: "{{ daemon_json | to_nice_json }}" 
+    dest: /etc/docker/daemon.json
+
+# Startup docker again
+- name: Start docker service 
+  systemd:
+    name: docker
+    state: started
+
