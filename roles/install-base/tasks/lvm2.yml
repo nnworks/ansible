@@ -29,7 +29,3 @@
   register: lvdata
   # all volumes in the volumes groups
   loop: "{{ lvm.volume_groups | subelements('volumes', skip_missing = True) }}"
-
-- name: lvdata
-  debug:
-    msg: "{{ lvdata }}"

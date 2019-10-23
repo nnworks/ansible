@@ -51,28 +51,29 @@
 
 
 # Configure docker for overlay2
-- name: create /etc/docker/daemon.json is not there yet
+
+- name: create /etc/docker/daemon.json if it is not there yet
   file:
     path: /etc/docker/daemon.json
-    state: file
+    state: touch
     mode: u=rwx,g=,o=
 
-- name: Load daemon.json
+- name: Fetch daemon.json from remote system
   slurp:
     src: /etc/docker/daemon.json
   register: daemon_json
 
-- name: Append overlay2 storage-driver
+- name: Add overlay2 storage-driver setting to docker's daemon.json
   set_fact:
-    daemon_json: "{{ daemon_json.content | b64decode | default('{}') | from_json | combine({ 'storage-driver': 'overlay2' }) }}"
+    # Convert file content or {} (when empty) from json to dictionary
+    daemon_json_content: "{{ (\"{ }\" if daemon_json.content | trim  == \"\" else daemon_json.content | b64decode) | from_json | combine({ 'storage-driver': 'overlay2' }) }}"
 
-- name: Write daemon.json
+- name: Write modified daemon.json back
   copy: 
-    content: "{{ daemon_json | to_nice_json }}" 
+    content: "{{ daemon_json_content | default([]) | to_nice_json(indent=2) }}" 
     dest: /etc/docker/daemon.json
 
-# Startup docker again
-- name: Start docker service 
+- name: Startup docker again with storage driver set to overlay2
   systemd:
     name: docker
     state: started
