@@ -31,6 +31,24 @@
     name: docker-ce
     state: latest
 
+############################################
+# configure docker proxy settings if needed
+############################################
 
+- name: configure docker proxy settings
+  block:
+  - name:  
+    file:
+      path: /etc/systemd/system/docker.service.d
+      state: directory
+      mode: u=rwx,g=rx,o=rx
+
+  - name: set proxies for docker
+    file: 
+      path: /etc/systemd/system/docker.service.d/http-proxy.conf
+      state: touch
+      mode: u=rw,g=r,o=r
+
+  when: proxy_settings is defined
 
 

@@ -11,4 +11,5 @@
     src: templates/priv-key-template.yml
     dest: "{{ ssh_key_file_from_vault }}.priv"
     owner: "{{ current_user }}"
+    lstrip_blocks: yes
     mode: u=rw,g=,o=

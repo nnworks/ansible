@@ -6,6 +6,10 @@
     name: docker
     state: stopped
 
+################################
+# Docker storage on lvm
+################################
+
 # Create mount point for docker storage lv
 - name: Create mount directory for docker storage
   file:
@@ -49,8 +53,9 @@
     state: link
     mode: u=rwx,g=x,o=x
 
-
+################################
 # Configure docker for overlay2
+################################
 
 - name: create /etc/docker/daemon.json if it is not there yet
   file:
@@ -72,6 +77,8 @@
   copy: 
     content: "{{ daemon_json_content | default([]) | to_nice_json(indent=2) }}" 
     dest: /etc/docker/daemon.json
+
+################################
 
 - name: Startup docker again with storage driver set to overlay2
   systemd:
