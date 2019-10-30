@@ -1,5 +1,5 @@
 ---
 
 - import_tasks: docker.yml
-#- import_tasks: config-docker-overlay2.yml
+- import_tasks: config-docker-overlay2.yml
 
