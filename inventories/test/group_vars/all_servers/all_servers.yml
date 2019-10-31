@@ -18,6 +18,9 @@ ca_certs: "{{ query('fileglob', ca_certs_dir + '/*.crt') }}"
 # SSH service name
 ssh_service: sshd
 
+# docker conf settings file
+docker_conf: /etc/systemd/system/docker.service.d/http-proxy.conf
+
 # LVM related vars
 lvm:
   volume_groups: 
@@ -39,8 +42,9 @@ lvm:
   - name: docker-data-vg
     physical_volumes: ["/dev/sdc"]
     size: 2G
-      # volumes:
-      #   volumes will be created by docker lvm management
+    volumes:
+    - name: docker-datavolumes-lv
+      size: 100%FREE
 
 # docker hints
 docker:
@@ -51,3 +55,5 @@ docker:
     mount_dir:  /var/lib/docker-storage-lvm 
   data:
     volume_group: "{{ lvm.volume_groups[2].name }}"
+    logical_volume: "{{ lvm.volume_groups[2].volumes[0].name }}"
+    mount_dir:  /var/lib/docker/volumes

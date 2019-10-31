@@ -39,15 +39,15 @@
   block:
   - name:  
     file:
-      path: /etc/systemd/system/docker.service.d
+      path: "{{ docker_conf | dirname }}"
       state: directory
       group: root
       mode: u=rwx,g=rx,o=rx
 
-  - name: modify config file
+  - name: modify docker config file {{ docker_conf }}
     template:
-      src: templates/http-proxy.conf.j2
-      dest: /etc/systemd/system/docker.service.d/http-proxy.conf
+      src: "templates/{{ docker_conf | basename }}.j2"
+      dest: "{{ docker_conf }}"
       group: root
       mode: u=rw,g=r,o=r
 

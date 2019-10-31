@@ -1,0 +1,8 @@
+---
+
+db_docker_image: postgres
+db_docker_container_name: postgresql
+db_lvm_data_volume_name: postgresql-data-lv
+db_lvm_data_volume_mount_point: /var/lib/postgresql-data
+db_lvm_data_volume_size: 1G
+db_max_memory: null

@@ -17,3 +17,7 @@ ca_certs: "{{ query('fileglob', ca_certs_dir + '/*.crt') }}"
 
 # SSH service name
 ssh_service: sshd
+
+# docker conf settings file
+docker_conf: /etc/systemd/system/docker.service.d/http-proxy.conf
+
