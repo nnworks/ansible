@@ -1,7 +1,7 @@
 ---
 
 # CA certificates to copy to host (if needed)
-ca_certs_dir:  "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}/certs"
+ca_certs_dir:  "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}/cacerts"
 ca_certs: "{{ query('fileglob', ca_certs_dir + '/*.crt') }}"
 
 # proxy settings, do not set when there is no proxy

@@ -7,6 +7,10 @@ ssh_vault_id: "{{ current_inventory_env }}-ssh"
 # file for key pair generation
 keypair_file: "ssh-key"
 
+# ca certs / keys vault location (self signed CA for internal communication between applications)
+cacert_vault_location: "{{ inventory_dir}}/group_vars/local/vault-cacert.yml"
+cacert_vault_id: "{{ current_inventory_env }}-cacert"
+
 # secrets vault location
 secrets_vault_location: "{{ inventory_dir}}/group_vars/all_servers/vault-secrets.yml"
 secrets_vault_id: "{{ current_inventory_env }}-secrets"

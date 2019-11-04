@@ -1,4 +1,4 @@
 .DS_Store
-resources/*/certs/*.crt
+resources/*/cacerts/*.crt
 inventories/*/group_vars/all_servers/vault-secrets.yml
 inventories/*/group_vars/local/vault-ssh.yml

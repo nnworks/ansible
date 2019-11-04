@@ -1,43 +1,22 @@
 ---
 
-# Create mount point for postgresql data
-#- name: Create mount directory for postgresql data
-#  file:
-#    path: "{{ db_lvm_data_volume_mount_point }}"
-#    state: directory
-#    group: root 
-#    mode: u=rwx,g=,o=
+########################################
+# Create data container for postgresql
+# Create postgres application container
 
-# Create logical volume
-- name: create and mount data logival volume for postgresql
-  lvol:
-    vg: "{{ docker.data.volume_group }}"
-    lv: "{{ db_lvm_data_volume_name }}"
-    size: "{{ db_lvm_data_volume_size }}"
-    active: yes
-    shrink: yes
+- name: create volume for postgres data
+  docker_volume:
+    name: "{{ db_data_volume_name }}"
     state: present
-  register: lvdata    
+    driver: local
+    #driver_options: "size=500M"
+      
 
-# Format logical volume
-- name: Format volume for postgresql data
-  filesystem:
-    fstype: xfs
-    opts: -n ftype=1
-    dev: "/dev/{{ docker.data.volume_group }}/{{ db_lvm_data_volume_name }}"
-
-# Mount logical volume
-- name: "Mount {{ db_lvm_data_volume_mount_point }}"
-  mount:
-    path: "{{ db_lvm_data_volume_mount_point }}"
-    src: "/dev/{{ docker.data.volume_group }}/{{ db_lvm_data_volume_name }}"
-    fstype: xfs
-    opts: defaults
-    state: mounted
 
 - name: get postgresql docker image
   docker_image: 
     name: "{{ db_docker_image }}"
+    tag: "alpine"
     source: pull
 
 - name: create postgresql docker container
@@ -45,6 +24,13 @@
     name: "{{ db_docker_container_name }}"
     image: "{{ db_docker_image }}"
     state: started
+    recreate: yes # make conditional
     memory: "{{ db_max_memory }}"
+    mounts: 
+      - data:
+        source: "{{ db_data_volume_name }}"
+        target: "{{ db_data_volume_mount_point }}"
+        
+    user: "root"
     restart_policy: always
 
