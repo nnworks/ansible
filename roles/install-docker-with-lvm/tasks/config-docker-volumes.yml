@@ -33,7 +33,7 @@
     opts: defaults
     state: mounted
 
-# Move /var/lib/docker to /var/lob/docker.prev
+# Move /var/lib/docker to /var/lib/docker.prev
 - name: stat /var/lib/docker/volumes
   stat: 
     path: /var/lib/docker/volumes

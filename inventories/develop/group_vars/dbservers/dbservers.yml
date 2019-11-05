@@ -1,8 +1,17 @@
 ---
 
+
+# Postgresql image settings
 db_docker_image: postgres
+db_docker_image_tag: alpine
 db_docker_container_name: postgresql
+
+# Postgresql data volume settings
 db_data_volume_name: postgresql-data
-db_data_volume_mount_point: /var/lib/postgresql-data
-db_lvm_data_volume_size: 1G
+db_data_volume_container_mount_point: /var/lib/postgresql/data
+
+# Postgresql settings for general setup
 db_max_memory: null
+db_postgres_dbname: postgres
+db_postgres_dbuser: postgres
+db_postgres_password: "12345"

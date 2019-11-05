@@ -1,36 +1,79 @@
 ---
 
+# Some prerequisites
+- name: Install Postgresql development lib, needed for pip module psycopg2
+  apt:
+    name: libpq-dev
+    state: latest 
+    update_cache: no     
+
+- name: Install python3-psycopg2 pip
+  pip:
+    name: psycopg2
+    state: present
+
 ########################################
 # Create data container for postgresql
 # Create postgres application container
 
+# Recreate the Postgresql container?
+- set_fact:
+    recreate: "{{'yes' if recreate_postgresql_container | lower is match('y|yes') else 'no'}}"
+
+# Create the data volume
 - name: create volume for postgres data
   docker_volume:
     name: "{{ db_data_volume_name }}"
     state: present
     driver: local
-    #driver_options: "size=500M"
+    recreate: never
       
-
-
+# Get the specified image for Postgresql
 - name: get postgresql docker image
   docker_image: 
     name: "{{ db_docker_image }}"
-    tag: "alpine"
+    tag: "{{ db_docker_image_tag }}"
     source: pull
 
+# Create / start the container. Recreate is conditional
 - name: create postgresql docker container
   docker_container:
     name: "{{ db_docker_container_name }}"
     image: "{{ db_docker_image }}"
     state: started
-    recreate: yes # make conditional
+    recreate: "{{ recreate }}"
     memory: "{{ db_max_memory }}"
     mounts: 
-      - data:
-        source: "{{ db_data_volume_name }}"
-        target: "{{ db_data_volume_mount_point }}"
-        
-    user: "root"
+      - source: "{{ db_data_volume_name }}"
+        target: "{{ db_data_volume_container_mount_point }}"
+        type: volume
+    user: "root" # should be changed
     restart_policy: always
+  register: postgresql_inspect_data
 
+- set_fact: 
+    postgres_ip: "{{ postgresql_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
+
+- name: Wait for Postgresql
+  wait_for:
+    host: "{{ postgres_ip }}"
+    port: 5432
+    state: drained
+    connect_timeout: 1
+    timeout: 30
+  register: postgres_running
+  until: postgres_running is success
+  retries: 10
+
+- name: configure docker proxy settings
+  block:
+  - name: "Create Postgresql {{ db_postgres_dbuser }} account"
+    postgresql_user:
+      encrypted: yes
+      login_host: "{{ postgres_ip }}"
+      login_user: "postgres"
+      db: "{{ db_postgres_dbname }}"
+      name: "{{ db_postgres_dbuser }}"
+      password: "{{ db_postgres_password }}"
+
+  when: postgres_running is success

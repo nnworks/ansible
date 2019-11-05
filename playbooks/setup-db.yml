@@ -3,6 +3,14 @@
 - hosts: 
   - dbservers
 
+  vars_prompt:
+    - name: recreate_postgresql_container
+      prompt: |-
+              Should the postgresql container be recreated if it is already there (y/n)?
+      private: no
+      unsafe: yes
+      default: "n"
+
   vars:
     # sudo to ansible user to copy public key into authorized_keys
     ansible_become: yes
@@ -11,6 +19,6 @@
     # ssh username / sudo password
     ansible_user: "{{ deployment_user }}"
     ansible_ssh_private_key_file: "{{ ssh_key_file_from_vault }}.priv"
-    
+
   roles:
     - postgresql
