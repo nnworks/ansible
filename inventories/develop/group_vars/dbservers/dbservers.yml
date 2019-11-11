@@ -4,7 +4,12 @@
 # Postgresql image settings
 db_docker_image: postgres
 db_docker_image_tag: alpine
+
+#Postgresql container settings
 db_docker_container_name: postgresql
+db_docker_container_hostname: postgresql-server
+db_docker_container_exposes_ports: ["5432"]
+db_docker_container_publish_ports: ["5432:5432"]
 
 # Postgresql data volume settings
 db_data_volume_name: postgresql-data

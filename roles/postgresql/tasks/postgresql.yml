@@ -17,7 +17,8 @@
 # Create postgres application container
 
 # Recreate the Postgresql container?
-- set_fact:
+- name: Determine whether the container should be re-created
+  set_fact:
     recreate: "{{'yes' if recreate_postgresql_container | lower is match('y|yes') else 'no'}}"
 
 # Create the data volume
@@ -47,25 +48,31 @@
       - source: "{{ db_data_volume_name }}"
         target: "{{ db_data_volume_container_mount_point }}"
         type: volume
+    hostname: "{{ db_docker_container_hostname }}"
+    exposed_ports: "{{ db_docker_container_exposes_ports }}"
+    published_ports: "{{ db_docker_container_publish_ports }}"
     user: "root" # should be changed
     restart_policy: always
   register: postgresql_inspect_data
 
-- set_fact: 
+# Store IP address of Postgresql for future use
+- name: Store IP of Postgresql server
+  set_fact: 
     postgres_ip: "{{ postgresql_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
 
-- name: Wait for Postgresql
+# Wait for Postgresql server to respond
+- name: Wait for Postgresql @ "{{ postgres_ip }}"
   wait_for:
     host: "{{ postgres_ip }}"
     port: 5432
     state: drained
     connect_timeout: 1
     timeout: 30
-  register: postgres_running
-  until: postgres_running is success
+  register: postgres_responding
+  until: postgres_responding is success
   retries: 10
 
-- name: configure docker proxy settings
+- name: Create Postgresql user
   block:
   - name: "Create Postgresql {{ db_postgres_dbuser }} account"
     postgresql_user:
@@ -76,4 +83,4 @@
       name: "{{ db_postgres_dbuser }}"
       password: "{{ db_postgres_password }}"
 
-  when: postgres_running is success
+  when: postgres_responding is success
