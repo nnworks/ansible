@@ -33,15 +33,12 @@
     opts: defaults
     state: mounted
 
-# Move /var/lib/docker to /var/lob/docker.prev
-- name: stat /var/lib/docker
-  stat: 
+# Remove /var/lib/docker
+- name: Remove /var/lib/docker
+  file:
+    state: absent
     path: /var/lib/docker
-  register: var_lib_docker_stat
-
-- name: Move /var/lib/docker to /var/lib/docker.prev
-  command: mv /var/lib/docker /var/lib/docker.prev
-  when: var_lib_docker_stat.stat.exists
+#  when: var_lib_docker_stat.stat.exists
 
 # symbolic link var_lib_docker_stat
 - name: "Create symbolic link from /var/lib/docker to {{ docker.storage.mount_dir }}"

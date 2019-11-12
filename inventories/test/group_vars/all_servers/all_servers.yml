@@ -52,8 +52,8 @@ docker:
     # for images, containers etc
     volume_group: "{{ lvm.volume_groups[1].name }}"
     logical_volume: "{{ lvm.volume_groups[1].volumes[0].name }}"
-    mount_dir:  /var/lib/docker-storage-lvm 
+    mount_dir:  "/var/lib/docker-storage-lvm"
   data:
     volume_group: "{{ lvm.volume_groups[2].name }}"
     logical_volume: "{{ lvm.volume_groups[2].volumes[0].name }}"
-    mount_dir:  /var/lib/docker/volumes
+    mount_dir:  "/var/lib/docker-volumes"

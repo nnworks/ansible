@@ -13,5 +13,5 @@
     ansible_become_pass: "{{ deployment_user_pass }}"
     
   roles:
-    - install-base
+    #- install-base
     - install-docker-with-lvm

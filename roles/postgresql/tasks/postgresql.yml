@@ -72,15 +72,15 @@
   until: postgres_responding is success
   retries: 10
 
-- name: Create Postgresql user
-  block:
-  - name: "Create Postgresql {{ db_postgres_dbuser }} account"
-    postgresql_user:
-      encrypted: yes
-      login_host: "{{ postgres_ip }}"
-      login_user: "postgres"
-      db: "{{ db_postgres_dbname }}"
-      name: "{{ db_postgres_dbuser }}"
-      password: "{{ db_postgres_password }}"
-
-  when: postgres_responding is success
+#- name: Create Postgresql user
+#  block:
+#  - name: "Create Postgresql {{ db_postgres_dbuser }} account"
+#    postgresql_user:
+#      encrypted: yes
+#      login_host: "{{ postgres_ip }}"
+#      login_user: "postgres"
+#      db: "{{ db_postgres_dbname }}"
+#      name: "{{ db_postgres_dbuser }}"
+#      password: "{{ db_postgres_password }}"
+#
+#  when: postgres_responding is success
