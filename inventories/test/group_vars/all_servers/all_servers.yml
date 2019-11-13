@@ -1,12 +1,7 @@
 ---
 
-# User to create on the target that will be used for ansible deployments.
-deployment_user: ansible
-# Groups to add the new user to.
-deployment_user_groups: sudo
-
 # CA certificates to copy to host (if needed)
-ca_certs_dir:  "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}/certs"
+ca_certs_dir:  "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}/cacerts"
 ca_certs: "{{ query('fileglob', ca_certs_dir + '/*.crt') }}"
 
 # proxy settings, do not set when there is no proxy
@@ -17,9 +12,6 @@ ca_certs: "{{ query('fileglob', ca_certs_dir + '/*.crt') }}"
 
 # SSH service name
 ssh_service: sshd
-
-# docker conf settings file
-docker_conf: /etc/systemd/system/docker.service.d/http-proxy.conf
 
 # LVM related vars
 lvm:
@@ -45,15 +37,21 @@ lvm:
     volumes:
     - name: docker-datavolumes-lv
       size: 100%FREE
+      
 
-# docker hints
+# docker settings
 docker:
+  # docker conf settings file
+  docker_conf: /etc/systemd/system/docker.service.d/http-proxy.conf
+  docker_dir: /var/lib/docker
+  # storage LVM
   storage:
     # for images, containers etc
     volume_group: "{{ lvm.volume_groups[1].name }}"
     logical_volume: "{{ lvm.volume_groups[1].volumes[0].name }}"
-    mount_dir:  "/var/lib/docker-storage-lvm"
+    mount_dir:  /var/lib/docker-storage-lvm
+  # data LVM
   data:
     volume_group: "{{ lvm.volume_groups[2].name }}"
     logical_volume: "{{ lvm.volume_groups[2].volumes[0].name }}"
-    mount_dir:  "/var/lib/docker-volumes"
+    mount_dir:  /var/lib/docker-volumes

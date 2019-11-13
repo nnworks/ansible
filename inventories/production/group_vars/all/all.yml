@@ -7,6 +7,11 @@ current_inventory_env: "{{ inventory_dir | basename }}"
 current_user: "{{ lookup('env','USER') }}"
 current_user_home: "{{ lookup('env','HOME') }}"
 
+# User on the target that will be used for ansible deployments.
+deployment_user: ansible
+# Groups of the deployment user.
+deployment_user_groups: sudo
+
 # Current user is used for initial ssh connection.
 ssh_user: "{{ current_user }}"
 
