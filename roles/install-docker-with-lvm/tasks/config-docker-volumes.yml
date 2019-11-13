@@ -10,31 +10,18 @@
 # Docker volumes on lvm logical volume
 #######################################
 
-# Move /var/lib/docker/volumes  /var/lib/docker/volumes.prev if it exists
-#- name: "stat /var/lib/docker/volumes"
-#  stat: 
-#    path: "/var/lib/docker/volumes"
-#  register: var_lib_docker_volumes_stat
-#
-#- name: "Move /var/lib/docker/volumes to /var/lib/docker/volumes.prev"
-#  command: "mv /var/lib/docker/volumes /var/lib/docker/volumes.prev"
-#  when: var_lib_docker_volumes_stat.stat.exists
-
-# Create mount point for docker storage lv
 - name: "Create mount directory for docker volumes on {{ docker.data.mount_dir }}"
   file:
     path: "{{ docker.data.mount_dir }}"
     state: directory
     mode: u=rwx,g=,o=
 
-# Format logical volume
 - name: Format volume for docker storage
   filesystem:
     fstype: xfs
     opts: -n ftype=1
     dev: "/dev/{{ docker.data.volume_group }}/{{ docker.data.logical_volume }}"
 
-# Mount logical volume 
 - name: "Mount {{ docker.data.mount_dir }} to /dev/{{ docker.data.volume_group }}/{{ docker.data.logical_volume }}"
   mount:
     path: "{{ docker.data.mount_dir }}"
@@ -43,11 +30,34 @@
     opts: defaults
     state: mounted
 
+- name: "file stat for {{ docker.docker_dir }}/volumes"
+  stat: 
+    path: "{{ docker.docker_dir }}/volumes"
+  register: docker_volumes_stat
+
+#- name: debugging
+#  debug:
+#    msg: "{{ (not docker_volumes_stat.stat.islnk) }} or  {{ (not (docker_volumes_stat.stat.lnk_target == ((docker.data.mount_dir + '/') | dirname))) }}"
+
+- name: If docker volumes dir is not a symlink, or not to the lvm volume, copy the data to the lvm volume
+  copy:
+    src: "{{ docker.docker_dir }}/volumes/"
+    dest: "{{ docker.data.mount_dir }}/"
+    remote_src: yes
+    mode: preserve
+  when: (not docker_volumes_stat.stat.islnk) or 
+        (not (docker_volumes_stat.stat.lnk_target == ((docker.data.mount_dir + "/") | dirname)))
+
+- name: "Remove {{ docker.docker_dir }}/volumes"
+  file:
+    path: "{{ docker.docker_dir }}/volumes"
+    state: absent
+
 # Create symbolic link 
-- name: "Create symbolic link from /var/lib/docker/volumes to {{ docker.data.mount_dir }}"
+- name: "Create symbolic link from {{ docker.docker_dir }}/volumes to {{ docker.data.mount_dir }}"
   file:
     src: "{{ docker.data.mount_dir }}"
-    dest: /var/lib/docker/volumes
+    dest: "{{ docker.docker_dir }}/volumes"
     owner: root
     group: root
     state: link
@@ -55,7 +65,7 @@
 
 ################################
 
-- name: Startup docker again with storage driver set to overlay2
+- name: Startup docker again with lvm data volume
   systemd:
     name: docker
     state: started

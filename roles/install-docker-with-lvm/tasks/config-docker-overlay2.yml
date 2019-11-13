@@ -10,21 +10,18 @@
 # Docker storage on lvm
 ################################
 
-# Create mount point for docker storage lv
-- name: Create mount directory for docker storage
+- name: "Create mount directory for docker storage lv ({{ docker.storage.mount_dir }})"
   file:
     path: "{{ docker.storage.mount_dir }}"
     state: directory
     mode: u=rwx,g=,o=
 
-# Format logical volume
-- name: Format volume for docker storage
+- name: "Format logical volume (/dev/{{ docker.storage.volume_group }}/{{ docker.storage.logical_volume }}) for docker storage"
   filesystem:
     fstype: xfs
     opts: -n ftype=1
     dev: "/dev/{{ docker.storage.volume_group }}/{{ docker.storage.logical_volume }}"
 
-# Mount logical volume
 - name: "Mount {{ docker.storage.mount_dir }}"
   mount:
     path: "{{ docker.storage.mount_dir }}"
@@ -33,15 +30,7 @@
     opts: defaults
     state: mounted
 
-# Remove /var/lib/docker
-- name: Remove /var/lib/docker
-  file:
-    state: absent
-    path: /var/lib/docker
-#  when: var_lib_docker_stat.stat.exists
-
-# symbolic link var_lib_docker_stat
-- name: "Create symbolic link from /var/lib/docker to {{ docker.storage.mount_dir }}"
+- name: "Create symbolic link from {{ docker.docker_dir }} to {{ docker.storage.mount_dir }}"
   file:
     src: "{{ docker.storage.mount_dir }}"
     dest: /var/lib/docker

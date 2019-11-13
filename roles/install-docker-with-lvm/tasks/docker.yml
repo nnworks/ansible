@@ -39,15 +39,15 @@
   block:
   - name:  
     file:
-      path: "{{ docker_conf | dirname }}"
+      path: "{{ docker.docker_conf | dirname }}"
       state: directory
       group: root
       mode: u=rwx,g=rx,o=rx
 
-  - name: modify docker config file {{ docker_conf }}
+  - name: modify docker config file {{ docker.docker_conf }}
     template:
-      src: "templates/{{ docker_conf | basename }}.j2"
-      dest: "{{ docker_conf }}"
+      src: "templates/{{ docker.docker_conf | basename }}.j2"
+      dest: "{{ docker.docker_conf }}"
       group: root
       mode: u=rw,g=r,o=r
 
