@@ -1,11 +1,30 @@
 ---
 
 # Some prerequisites
+- name: Add PostgreSQL GPG apt Key
+  apt_key:
+    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb http://apt.postgresql.org/pub/repos/apt/ {{ansible_distribution_release}}-pgdg main
+
+
 - name: Install Postgresql development lib, needed for pip module psycopg2
   apt:
     name: libpq-dev
     state: latest 
     update_cache: false     
+
+- name: Install PostgreSQL client packages
+  apt:
+    name: "{{ item }}"
+    state: latest 
+    update_cache: false
+  loop:
+    - postgresql-client-common
+    - postgresql-client-12
 
 - name: Install python3-psycopg2 pip
   pip:
@@ -16,18 +35,22 @@
 # Create data container for postgresql
 # Create postgres application container
 
-# Recreate the Postgresql container?
-- name: Determine whether the container should be re-created
-  set_fact:
-    recreate: "{{'yes' if recreate_postgresql_container | lower is match('y|yes') else 'no'}}"
+# If the volume should be recreated, stop docker postgresql atomic_container
+# Shutdown docker
 
-# Create the data volume
-- name: create volume for postgres data
+- name: "Stop docker container {{ db_docker_container_name }}"
+  docker_container:
+    name: "{{ db_docker_container_name }}"
+    image: "{{ db_docker_image }}"
+    state: stopped
+  when: recreate_db_volume == "always"
+
+# (Re)Create the data volume
+- name: Create volume for postgres data
   docker_volume:
     name: "{{ db_data_volume_name }}"
     state: present
     driver: local
-    recreate: never
       
 # Get the specified image for Postgresql
 - name: get postgresql docker image
@@ -42,7 +65,7 @@
     name: "{{ db_docker_container_name }}"
     image: "{{ db_docker_image }}"
     state: started
-    recreate: "{{ recreate }}"
+    recreate: "{{ recreate_db_container }}"
     memory: "{{ db_max_memory }}"
     mounts: 
       - source: "{{ db_data_volume_name }}"

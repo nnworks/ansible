@@ -10,11 +10,11 @@
 # Docker storage on lvm
 ################################
 
-- name: "Create mount directory for docker storage lv ({{ docker.storage.mount_dir }})"
-  file:
-    path: "{{ docker.storage.mount_dir }}"
-    state: directory
-    mode: u=rwx,g=,o=
+#- name: "Create mount directory for docker storage lv ({{ docker.storage.mount_dir }})"
+#  file:
+#    path: "{{ docker.storage.mount_dir }}"
+#    state: directory
+#    mode: u=rwx,g=,o=
 
 - name: "Format logical volume (/dev/{{ docker.storage.volume_group }}/{{ docker.storage.logical_volume }}) for docker storage"
   filesystem:
@@ -30,14 +30,14 @@
     opts: defaults
     state: mounted
 
-- name: "Create symbolic link from {{ docker.docker_dir }} to {{ docker.storage.mount_dir }}"
-  file:
-    src: "{{ docker.storage.mount_dir }}"
-    dest: /var/lib/docker
-    owner: root
-    group: root
-    state: link
-    mode: u=rwx,g=x,o=x
+#- name: "Create symbolic link from {{ docker.docker_dir }} to {{ docker.storage.mount_dir }}"
+#  file:
+#    src: "{{ docker.storage.mount_dir }}"
+#    dest: /var/lib/docker
+#    owner: root
+#    group: root
+#    state: link
+#    mode: u=rwx,g=x,o=x
 
 ################################
 # Configure docker for overlay2

@@ -97,11 +97,18 @@ If other than standard CA certificates need to be installed, put them (in crt fo
 
 After this step, you can login to the hosts with `ssh ansible@<host> -i ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.priv` 
 
-`ansible-playbook playbooks/setup-remote.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`
+`ansible-playbook playbooks/setup-remote-base.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`
 
 - Install CA certificates (*.crt) present in resources/develop/certs/
 - Upgrades the system (and restarts when packages are updated)
-- Installs a basic set of packages needed for docker etc, like aptitude, python3, some pips, docker-compose and docker-ce
+- Installs a basic set of packages needed for docker etc, like aptitude, python3, some pips, LVM
+- Installs docker-compose and docker-ce. Creates a storage and data logical LVM volume (see settings in all-servers.yml). The docker directory is    symlinked to the storage volume, and the docker/volumes directory is symlinked to the data volume. The idea is that `docker volume` should be used to create persistant data volumes.
+
+## 3) Remote installation of a PostgreSQL database.
+
+`ansible-playbook playbooks/setup-db.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`
+
+- Installs PostgreSQL
 
 
 # Help, it doesn't work

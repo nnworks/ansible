@@ -11,6 +11,13 @@
       unsafe: true
       default: "n"
 
+    - name: recreate_postgresql_volume
+      prompt: |-
+              Should the postgresql volume data be recreated (will be deleted if it is there)?
+      private: false
+      unsafe: true
+      default: "n"
+
   vars:
     # sudo to ansible user to copy public key into authorized_keys
     ansible_become: true
