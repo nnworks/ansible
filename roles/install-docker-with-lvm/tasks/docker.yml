@@ -3,7 +3,7 @@
 - name: Install prerequisites
   apt:
     name: ['apt-transport-https', 'curl', 'software-properties-common']
-    update_cache: no
+    update_cache: false
 
 - name: Add Docker GPG apt Key
   apt_key:
@@ -21,13 +21,13 @@
 
 - name: Install docker-ce
   apt: 
-    update_cache: no
+    update_cache: false
     name: docker-ce
     state: latest
 
 - name: Install docker-compose
   apt: 
-    update_cache: no
+    update_cache: false
     name: docker-ce
     state: latest
 
@@ -54,7 +54,7 @@
   - name: daemon_reload fr changed settings and restart docker
     systemd:
       state: restarted
-      daemon_reload: yes
+      daemon_reload: true
       name: docker
 
   when: proxy_settings is defined

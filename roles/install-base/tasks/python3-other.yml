@@ -4,10 +4,10 @@
   apt:
     name: python-setuptools
     state: latest 
-    update_cache: no 
+    update_cache: false 
 
 - name: Install pip
   apt:
     name: python3-pip
     state: latest 
-    update_cache: no 
+    update_cache: false 

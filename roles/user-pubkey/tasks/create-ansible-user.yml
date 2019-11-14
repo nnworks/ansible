@@ -4,7 +4,7 @@
 
   vars:
     # sudo to ansible user to copy public key into authorized_keys
-    ansible_become: yes
+    ansible_become: true
     ansible_become_user: root
     ansible_become_pass: "{{ ssh_pass }}"    
 
@@ -12,10 +12,10 @@
     name: "{{ deployment_user }}"
     comment: Ansible user
     groups: "{{ deployment_user_groups }}"
-    generate_ssh_key: yes
-    force: no
-    append: no
-    create_home: yes
+    generate_ssh_key: true
+    force: false
+    append: false
+    create_home: true
     shell: /bin/bash
     update_password: always
     password: "{{ deployment_user_pass | password_hash('sha512') }}"

@@ -43,7 +43,7 @@
   copy:
     src: "{{ docker.docker_dir }}/volumes/"
     dest: "{{ docker.data.mount_dir }}/"
-    remote_src: yes
+    remote_src: true
     mode: preserve
   when: (not docker_volumes_stat.stat.islnk) or 
         (not (docker_volumes_stat.stat.lnk_target == ((docker.data.mount_dir + "/") | dirname)))

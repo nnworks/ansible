@@ -2,9 +2,9 @@
 
 - name: Update and upgrade
   apt:
-    autoclean: yes
-    autoremove: yes
-    update_cache: yes
+    autoclean: true
+    autoremove: true
+    update_cache: true
     upgrade: "yes"
   register: result
   notify: Reboot server

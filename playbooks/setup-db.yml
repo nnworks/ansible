@@ -7,13 +7,13 @@
     - name: recreate_postgresql_container
       prompt: |-
               Should the postgresql container be recreated if it is already there (y/n)?
-      private: no
-      unsafe: yes
+      private: false
+      unsafe: true
       default: "n"
 
   vars:
     # sudo to ansible user to copy public key into authorized_keys
-    ansible_become: yes
+    ansible_become: true
     ansible_become_pass: "{{ deployment_user_pass }}"
 
     # ssh username / sudo password

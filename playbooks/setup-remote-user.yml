@@ -13,8 +13,8 @@
               User [{{ lookup('env', 'USER') }}] will be used to connect to the targets for creating an ansible user.
               After that, the public ssh key (that should be in the local vault) will be copied to the authorized_keys file of the ansible user.
               Please provide the password for user [{{ lookup('env', 'USER') }}] to login to the remote machine
-      private: yes
-      unsafe: yes
+      private: true
+      unsafe: true
 
   vars:
     # ssh username / password

@@ -4,6 +4,6 @@
   apt: 
     name: aptitude 
     state: latest 
-    update_cache: no 
-    force_apt_get: yes
+    update_cache: false 
+    force_apt_get: true
 
