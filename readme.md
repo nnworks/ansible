@@ -6,6 +6,8 @@
 
 ## **System (local):**
 
+**Ansible >v2.9**
+
 **Python preferably v3**
 
 **setuptools**
@@ -41,33 +43,22 @@ or
      `brew install sshpass`
  
 
-## Python modules:
-(or run playbook setup-local.yml)
-
-**passlib (local):**
-
-pip install --user passlib
-
-
-
 ## **Remote host:**
 
 **sshd**
 
 **Proxy**
-If needed a proxy should be installed and configured.
+If needed a proxy should be installed and configured:
 
-(http_proxy, https_proxy)
-
-**CA certificates**
-If needed additional CA certificates should be installed and configured.
-
+```
+proxy_settings:
+  https_proxy: http://127.0.0.1:3128
+  http_proxy: http://127.0.0.1:3128
+  no_proxy: localhost, 127.0.0.1
+```
 
 ## CA certificates
 If other than standard CA certificates need to be installed, put them (in crt format with extention .crt) in the **certs** folder in the inventories/[develop|...|production] directory.
-
-**LVM2**
-
 
 # Playbooks
 
@@ -89,20 +80,24 @@ If other than standard CA certificates need to be installed, put them (in crt fo
 
 ## 2) Remote user / authentication / basic
 
+### Set up remote user for ansible deployments:
+
 `ansible-playbook playbooks/setup-remote-user.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`
 
-- Creates an ansible user 'ansible'
-- Copy the public key from ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.pub to the authorized_keys set of the ansible user.
-- **TODO:** Disables logging in with username / password for the ansible user.
+- Creates a deployment user user defined by 'deployment_user' (for example: ansible)
+- Copy the public key from ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.pub to the authorized_keys set of the deployment user.
+- Disables logging in with username / password for the deployment user.
 
-After this step, you can login to the hosts with `ssh ansible@<host> -i ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.priv` 
+After this step, you can login as ansible (or another user specified as 'deployment_user') to the hosts with `ssh ansible@<host> -i ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.priv` 
+
+### Install basic packages on the remote host:
 
 `ansible-playbook playbooks/setup-remote-base.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`
 
 - Install CA certificates (*.crt) present in resources/develop/certs/
 - Upgrades the system (and restarts when packages are updated)
 - Installs a basic set of packages needed for docker etc, like aptitude, python3, some pips, LVM
-- Installs docker-compose and docker-ce. Creates a storage and data logical LVM volume (see settings in all-servers.yml). The docker directory is    symlinked to the storage volume, and the docker/volumes directory is symlinked to the data volume. The idea is that `docker volume` should be used to create persistant data volumes.
+- Installs docker-compose and docker-ce. Mounts specified LVM volume as the docker directory. The docker/volumes directory is also a mount point for a specified LVM logical volume (see settings in *all-servers.yml*). The idea is that `docker volume` should be used to create persistant data volumes.
 
 ## 3) Remote installation of a PostgreSQL database.
 

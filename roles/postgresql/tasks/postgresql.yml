@@ -51,7 +51,8 @@
     name: "{{ db_data_volume_name }}"
     state: present
     driver: local
-      
+    recreate: "{{ recreate_db_volume }}"
+    
 # Get the specified image for Postgresql
 - name: get postgresql docker image
   docker_image: 

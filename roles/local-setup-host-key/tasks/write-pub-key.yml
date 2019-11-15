@@ -6,7 +6,7 @@
     state: directory
     mode: u=rwx,g=,o=
 
-- name: Create priv key
+- name: Create pub key
   template:
     src: templates/pub-key-template.j2
     dest: "{{ ssh_key_file_from_vault }}.pub"
