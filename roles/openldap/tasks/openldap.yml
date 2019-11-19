@@ -12,7 +12,6 @@
 # Create OpenLDAP application container
 
 # If the volume should be recreated, stop docker openldap container
-# Shutdown docker container
 
 - name: "Stop docker container {{ openldap_docker_container_name }}"
   docker_container:

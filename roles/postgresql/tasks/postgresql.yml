@@ -35,7 +35,6 @@
 # Create postgres application container
 
 # If the volume should be recreated, stop docker postgresql container
-# Shutdown docker container
 
 - name: "Stop docker container {{ db_docker_container_name }}"
   docker_container:

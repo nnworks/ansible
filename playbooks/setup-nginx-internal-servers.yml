@@ -1,0 +1,33 @@
+---
+
+- hosts: 
+  - internal_servers
+
+  vars_prompt:
+    - name: recreate_nginx_container
+      prompt: |-
+              Should the NginX container be recreated if it is already there (y/n)?
+      private: false
+      unsafe: true
+      default: "n"
+
+    - name: recreate_nginx_volume
+      prompt: |-
+              Recreate NginX volume (you will loose persistent data, and container will be recreated!)?
+      private: false
+      unsafe: true
+      confirm: yes
+      default: "n"
+
+  vars:
+    # sudo to ansible user to copy public key into authorized_keys
+    ansible_become: true
+    ansible_become_pass: "{{ deployment_user_pass }}"
+    config_resources: "{{ resource_dir }}/nginx-internal"
+
+    # ssh username / sudo password
+    ansible_user: "{{ deployment_user }}"
+    ansible_ssh_private_key_file: "{{ ssh_key_file_from_vault }}.priv"
+
+  roles:
+    - nginx

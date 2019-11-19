@@ -1,27 +1,23 @@
 ---
 
 # OpenLDAP image settings
-openldap_docker_image: osixia/openldap
-openldap_docker_image_tag: latest
+nginx_docker_image: blabla
+nginx_docker_image_tag: alpine
 
 # OpenLDAP container settings
-openldap_docker_container_name: openldap
-openldap_docker_container_hostname: openldap-server
-openldap_docker_container_exposes_ports: ["389", "636"]
-openldap_docker_container_publish_ports: ["389:389", "636:636"]
-openldap_max_memory: null
+nginx_docker_container_name: nginx
+nginx_docker_container_hostname: nginx-server
+nginx_docker_container_exposes_ports: ["80", "443"]
+nginx_docker_container_publish_ports: ["80:80", "443:443"]
+nginx_max_memory: null
 
 # OpenLDAP data volume settings
-openldap_data_volume_name: openldap-data
-openldap_config_volume_name: openldap-config
-openldap_data_volume_container_mount_point: /var/lib/ldap
-openldap_config_volume_container_mount_point: /etc/ldap/slapd.d
+nginx_data_volume_name: nginx-site-data
+nginx_config_volume_name: openldap-config
+nginx_site_data_volume_container_mount_point: /var/lib/ldap
+nginx_config_volume_container_mount_point: /etc/ldap/slapd.d
 
-# OpenLDAP settings for general setup
-openldap_postgres_dbname: postgres
-openldap_postgres_dbuser: postgres1
-openldap_postgres_password: "12345"
 
 # Deployment hints
-recreate_ldap_container: "{{'yes' if recreate_openldap_container | lower is match('y|yes') else 'no'}}"
-recreate_ldap_volumes: "{{'always' if recreate_openldap_volumes | lower is match('y|yes') else 'never'}}"
+recreate_nginx_container: "{{'yes' if recreate_nginx_container | lower is match('y|yes') else 'no'}}"
+recreate_nginx_volumes: "{{'always' if recreate_nginx_volumes | lower is match('y|yes') else 'never'}}"
