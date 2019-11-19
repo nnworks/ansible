@@ -5,7 +5,7 @@
 # - Copy executing user's public key to authorized_keys of ansible user
 # After this the executing user is able to log in as ansible user using ssh key authentication 
 - hosts: 
-  - webservers
+  - web_servers
 
   vars_prompt: 
     - name: ssh_pass 

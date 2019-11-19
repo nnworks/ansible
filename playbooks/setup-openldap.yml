@@ -1,19 +1,19 @@
 ---
 
 - hosts: 
-  - db_servers
+  - ldap_servers
 
   vars_prompt:
-    - name: recreate_postgresql_container
+    - name: recreate_openldap_container
       prompt: |-
-              Should the PostgreSQL container be recreated if it is already there (y/n)?
+              Should the OpenLDAP container be recreated if it is already there (y/n)?
       private: false
       unsafe: true
       default: "n"
 
-    - name: recreate_postgresql_volume
+    - name: recreate_openldap_volumes
       prompt: |-
-              Recreate PostgreSQL volume (you will loose persistent data, and container will be recreated!)?
+              Recreate OpenLDAP volumes (you will loose persistent data, and container will be recreated!)?
       private: false
       unsafe: true
       confirm: yes
@@ -29,4 +29,4 @@
     ansible_ssh_private_key_file: "{{ ssh_key_file_from_vault }}.priv"
 
   roles:
-    - postgresql
+    - openldap

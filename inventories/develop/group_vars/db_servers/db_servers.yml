@@ -9,17 +9,19 @@ db_docker_container_name: postgresql
 db_docker_container_hostname: postgresql-server
 db_docker_container_exposes_ports: ["5432"]
 db_docker_container_publish_ports: ["5432:5432"]
+db_max_memory: null
 
 # Postgresql data volume settings
 db_data_volume_name: postgresql-data
 db_data_volume_container_mount_point: /var/lib/postgresql/data
 
 # Postgresql settings for general setup
-db_max_memory: null
 db_postgres_dbname: postgres
 db_postgres_dbuser: postgres1
 db_postgres_password: "12345"
 
-#deployment hints
+# Deployment hints
 recreate_db_container: "{{'yes' if recreate_postgresql_container | lower is match('y|yes') else 'no'}}"
 recreate_db_volume: "{{'always' if recreate_postgresql_volume | lower is match('y|yes') else 'never'}}"
+
+#

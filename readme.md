@@ -104,7 +104,8 @@ After this step, you can login as ansible (or another user specified as 'deploym
 `ansible-playbook playbooks/setup-db.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`
 
 - Installs PostgreSQL
-
+- Requests whether the container should be recreated. If 'no', no update is done.
+- Requests whether the postgres-data volume for persistant data should be recreated a.k.a. deleted and created again.
 
 # Help, it doesn't work
 

@@ -1,0 +1,100 @@
+---
+
+# Some prerequisites
+
+########################################
+# Create data volumes for NginX
+# Create NginX application container
+
+# If the volume should be recreated, stop docker openldap container
+# Shutdown docker container
+
+- name: "Stop docker container {{ openldap_docker_container_name }}"
+  docker_container:
+    name: "{{ openldap_docker_container_name }}"
+    image: "{{ openldap_docker_image }}"
+    state: absent  # Remove container
+    keep_volumes: false
+  when: recreate_ldap_volumes == "always"
+
+# (Re)Create the data volume
+- name: Create volume for openldap data
+  docker_volume:
+    name: "{{ item }}"
+    state: present
+    driver: local
+    recreate: "{{ recreate_ldap_volumes }}"
+  loop: 
+   - openldap_data_volume_name
+   - openldap_config_volume_name
+    
+# Get the specified image for OpenLDAP
+- name: get openldap docker image
+  docker_image: 
+    name: "{{ openldap_docker_image }}"
+    tag: "{{ openldap_docker_image_tag }}"
+    source: pull
+
+# Create / start the container. Recreate is conditional
+- name: create openldap docker container
+  docker_container:
+    name: "{{ openldap_docker_container_name }}"
+    image: "{{ openldap_docker_image }}"
+    state: started
+    recreate: "{{ recreate_ldap_container }}"
+    memory: "{{ openldap_max_memory }}"
+    mounts: 
+      - source: "{{ openldap_data_volume_name }}"
+        target: "{{ openldap_data_volume_container_mount_point }}"
+        type: volume
+      - source: "{{ openldap_config_volume_name }}"
+        target: "{{ openldap_config_volume_container_mount_point }}"
+        type: volume
+    hostname: "{{ openldap_docker_container_hostname }}"
+    exposed_ports: "{{ openldap_docker_container_exposes_ports }}"
+    published_ports: "{{ openldap_docker_container_publish_ports }}"
+    user: "root" # should be changed
+    restart_policy: always
+  register: openldap_inspect_data
+
+# Store IP address of OpenLDAP for future use
+- name: Store IP of Postgresql server
+  set_fact: 
+    openldap_ip: "{{ openldap_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
+
+# Wait for Postgresql server to respond
+- name: "Wait for OpenLDAP @ {{ openldap_ip }} : {{ openldap_docker_container_exposes_ports[0] }}"
+  wait_for:
+    host: "{{ openldap_ip }}"
+    port: "{{ openldap_docker_container_exposes_ports[0] }}"
+    state: drained
+    connect_timeout: 1
+    timeout: 30
+  register: openldap_responding
+  until: openldap_responding is success
+  retries: 10
+
+##################################
+#
+##################################
+
+# Get the specified image for OpenLDAP
+- name: get phpldapadmin docker image
+  docker_image: 
+    name: "{{ openldap_admin_docker_image }}"
+    tag: "{{ openldap_admin_docker_image_tag }}"
+    source: pull
+
+- name "Install PHP LDAP Admin"
+osixia/phpldapadmin
+
+#- name: Create OpenLDAP entries
+#  block:
+#  - name: "Create OpenLDAP {{ openldap_postgres_dbuser }} account"
+#    ldap_entry:
+#      state: present
+#      server_uri: "{{ openldap_ip }}"
+#      dn: ou=users,dc=nnworks,dc=com
+#      objectClass: organizationalUnit
+#
+#  when: openldap_responding is success

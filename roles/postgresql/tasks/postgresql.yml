@@ -10,7 +10,6 @@
   apt_repository:
     repo: deb http://apt.postgresql.org/pub/repos/apt/ {{ansible_distribution_release}}-pgdg main
 
-
 - name: Install Postgresql development lib, needed for pip module psycopg2
   apt:
     name: libpq-dev
@@ -32,17 +31,18 @@
     state: present
 
 ########################################
-# Create data container for postgresql
+# Create volume for postgresql data
 # Create postgres application container
 
-# If the volume should be recreated, stop docker postgresql atomic_container
-# Shutdown docker
+# If the volume should be recreated, stop docker postgresql container
+# Shutdown docker container
 
 - name: "Stop docker container {{ db_docker_container_name }}"
   docker_container:
     name: "{{ db_docker_container_name }}"
     image: "{{ db_docker_image }}"
-    state: stopped
+    state: absent  # Remove container
+    keep_volumes: false
   when: recreate_db_volume == "always"
 
 # (Re)Create the data volume
@@ -85,10 +85,10 @@
     postgres_ip: "{{ postgresql_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
 
 # Wait for Postgresql server to respond
-- name: Wait for Postgresql @ "{{ postgres_ip }}"
+- name: "Wait for PostgreSQL @ {{ postgres_ip }} : {{ db_docker_container_exposes_ports[0] }}"
   wait_for:
     host: "{{ postgres_ip }}"
-    port: 5432
+    port: "{{ db_docker_container_exposes_ports[0] }}"
     state: drained
     connect_timeout: 1
     timeout: 30
