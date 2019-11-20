@@ -21,7 +21,11 @@
     vault_ssh_priv: "{{ lookup('file',  '{{ internal_ca_key_file }}') }}"
     vault_ssh_pub: "{{ lookup('file',  '{{ internal_ca_key_file }}.pub') }}"
 
-- openssl_csr:
+# TODO: replace by ssh commands, this does not weork relaiable on osx
+# "msg": "Could not deserialize key data." when using python3, with python2.7 it does not work at all...
+
+- name: Create CA certificate request
+  openssl_csr:
     # See also: https://www.openssl.org/docs/manmaster/man5/x509v3_config.html
     path: "{{ internal_ca_csr }}"
     privatekey_path: "{{ internal_ca_key_file }}"
@@ -40,9 +44,10 @@
       - serverAuth
     state: present
 
+
 - name: Generate a Self Signed CA certificate
   openssl_certificate:
-    path: "{{ internal_internal_ca_cert }}"
+    path: "{{ internal_ca_cert }}"
     privatekey_path: "{{ internal_ca_key_file }}"
     csr_path: "{{ internal_ca_csr }}"
     provider: selfsigned

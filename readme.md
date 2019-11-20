@@ -8,7 +8,9 @@
 
 **Ansible >v2.9**
 
-**Python preferably v3**
+**Python v3**
+
+For OSX set the param interpreter_python in the ansible.cfg to other than 'auto' if needed.
 
 **setuptools**
 
@@ -18,11 +20,7 @@ For osx:
 
 `easy_install setuptools`
 
-**pip or pip3**
-sudo apt-get install python-pip
-
-or
-
+**pip3**
 sudo apt-get install python3-pip
 
 For osx:

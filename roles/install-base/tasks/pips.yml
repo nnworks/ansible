@@ -1,11 +1,10 @@
 ---
 
-- name: Install docker pip
+- name: Install pips
   pip:
-    name: docker
-    state: present    
-    
-- name: Install docker-compose pip
-  pip:
-    name: docker-compose
+    executable: pip3
+    name: "{{ item }}"
     state: present
+  loop:
+  - docker
+  - docker-compose

@@ -1,6 +1,11 @@
 ---
 
-- name: passlib pip
+- name: pips
   pip:
-    name: passlib
+    executable: pip3
+    name: "{{ item }}"
     state: present
+  loop:
+    - passlib
+    - pyOpenSSL
+    - cryptography

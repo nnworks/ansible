@@ -1,7 +1,17 @@
 ---
 
-- name: Install python3-openssl
-  apt:
-    name: python3-openssl
-    state: latest
-  become: true
+- name: Determine os. DO not install packages on non-Linux systems.
+  set_fact:
+    non_linux: ansible_os_family != 'Windows' and ansible_os_family != 'Darwin'
+             
+- name: packages install
+  block: 
+  - name: Install python3-openssl
+    apt:
+      name: python3-openssl
+      state: latest
+    become: true
+  
+  when: non_linux == false
+
+
