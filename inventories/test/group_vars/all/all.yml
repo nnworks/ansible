@@ -3,6 +3,9 @@
 # current inventory 
 current_inventory_env: "{{ inventory_dir | basename }}"
 
+# resource directory
+resource_dir: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}"
+
 # Current user is used for initial ssh connection.
 current_user: "{{ lookup('env','USER') }}"
 current_user_home: "{{ lookup('env','HOME') }}"
@@ -26,3 +29,4 @@ certs_stuff_location: "{{ current_user_home }}/ansible/certs/{{ current_inventor
 
 # private key location for key authentication ()
 ssh_key_file_from_vault: "{{ ssh_keypair_location }}/ssh-key-from-vault"
+

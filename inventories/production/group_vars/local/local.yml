@@ -17,3 +17,4 @@ secrets_vault_id: "{{ current_inventory_env }}-secrets"
 
 # password for the ansible user (used for sudo lateron).
 deployment_user_pass: "{{ lookup('password', '/tmp/passwordfile chars=ascii_letters length=20') }}"
+
