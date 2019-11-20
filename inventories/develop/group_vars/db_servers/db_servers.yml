@@ -21,7 +21,6 @@ db_postgres_dbuser: postgres1
 db_postgres_password: "12345"
 
 # Deployment hints
-recreate_db_container: "{{'yes' if recreate_postgresql_container | lower is match('y|yes') else 'no'}}"
-recreate_db_volume: "{{'always' if recreate_postgresql_volume | lower is match('y|yes') else 'never'}}"
+recreate_postgresql_container: "{{'yes' if recreate_postgresql_container_input | lower is match('y|yes') else 'no'}}"
+recreate_postgresql_volume: "{{'always' if recreate_postgresql_volume_input | lower is match('y|yes') else 'never'}}"
 
-#

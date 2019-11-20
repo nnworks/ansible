@@ -42,7 +42,7 @@
     image: "{{ db_docker_image }}"
     state: absent  # Remove container
     keep_volumes: false
-  when: recreate_db_volume == "always"
+  when: recreate_postgresql_volume == "always"
 
 # (Re)Create the data volume
 - name: Create volume for postgres data
@@ -50,7 +50,7 @@
     name: "{{ db_data_volume_name }}"
     state: present
     driver: local
-    recreate: "{{ recreate_db_volume }}"
+    recreate: "{{ recreate_postgresql_volume }}"
     
 # Get the specified image for Postgresql
 - name: get postgresql docker image
@@ -65,7 +65,7 @@
     name: "{{ db_docker_container_name }}"
     image: "{{ db_docker_image }}"
     state: started
-    recreate: "{{ recreate_db_container }}"
+    recreate: "{{ recreate_postgresql_container }}"
     memory: "{{ db_max_memory }}"
     mounts: 
       - source: "{{ db_data_volume_name }}"
@@ -78,13 +78,11 @@
     restart_policy: always
   register: postgresql_inspect_data
 
-# Store IP address of Postgresql for future use
 - name: Store IP of Postgresql server
   set_fact: 
     postgres_ip: "{{ postgresql_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
 
-# Wait for Postgresql server to respond
-- name: "Wait for PostgreSQL @ {{ postgres_ip }} : {{ db_docker_container_exposes_ports[0] }}"
+- name: "Wait for PostgreSQL @ {{ postgres_ip }} : {{ db_docker_container_exposes_ports[0] }} to respond"
   wait_for:
     host: "{{ postgres_ip }}"
     port: "{{ db_docker_container_exposes_ports[0] }}"

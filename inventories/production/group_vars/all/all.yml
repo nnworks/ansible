@@ -16,7 +16,13 @@ deployment_user_groups: sudo
 ssh_user: "{{ current_user }}"
 
 # keypair settings (key will only be here during setup of authentication for host)
-keypair_location: "{{ current_user_home }}/ansible/keypairs/{{ current_inventory_env }}"
+ssh_keypair_location: "{{ current_user_home }}/ansible/keypairs/{{ current_inventory_env }}"
+
+# ca keypair and certificates
+ca_stuff_location: "{{ current_user_home }}/ansible/certs/{{ current_inventory_env }}/ca-stuff"
+
+# ca keypair and certificates
+certs_stuff_location: "{{ current_user_home }}/ansible/certs/{{ current_inventory_env }}/certs-stuff"
 
 # private key location for key authentication ()
-ssh_key_file_from_vault: "{{ keypair_location }}/ssh-key-from-vault"
+ssh_key_file_from_vault: "{{ ssh_keypair_location }}/ssh-key-from-vault"

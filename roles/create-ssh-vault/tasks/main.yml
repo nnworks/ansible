@@ -3,7 +3,7 @@
 # Generate keypair and store it in facts / vars: vault_ssh_priv, vault_ssh_pub
 # Vars needed: 
 # - current_user: user running this script
-# - keypair_location: where is the keypair generated
+# - ssh_keypair_location: where is the keypair generated
 # - keypair_file: filename of the private key
 - import_tasks: generate-ssh-keypair.yml  
 

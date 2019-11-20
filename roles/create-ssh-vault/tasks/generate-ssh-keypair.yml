@@ -2,7 +2,7 @@
 
 - name: Create directory for keypair
   file:
-    path: "{{ keypair_location }}"
+    path: "{{ ssh_keypair_location }}"
     state: directory
     mode: u=rwx,g=,o=
 
@@ -12,21 +12,21 @@
     state: present
     size: 4096
     comment: "key-{{ current_user }}"
-    path: "{{ keypair_location }}/{{ keypair_file }}"
+    path: "{{ ssh_keypair_location }}/{{ keypair_file }}"
     owner: "{{ current_user }}"
     mode: u=rw,g=,o=
 
 - name: Store keys in variables  
   set_fact:
-    vault_ssh_priv: "{{ lookup('file',  '{{ keypair_location }}/{{keypair_file}}') }}"
-    vault_ssh_pub: "{{ lookup('file',  '{{ keypair_location }}/{{keypair_file}}.pub') }}"
+    vault_ssh_priv: "{{ lookup('file',  '{{ ssh_keypair_location }}/{{keypair_file}}') }}"
+    vault_ssh_pub: "{{ lookup('file',  '{{ ssh_keypair_location }}/{{keypair_file}}.pub') }}"
 
 - name: remove priv keypair from disk
   file:
     state: absent
-    path: "{{ keypair_location }}/{{ keypair_file }}"
+    path: "{{ ssh_keypair_location }}/{{ keypair_file }}"
 
-- name: remove priv keypair from disk
+- name: remove pub keypair from disk
   file:
     state: absent
-    path: "{{ keypair_location }}/{{ keypair_file }}.pub"
+    path: "{{ ssh_keypair_location }}/{{ keypair_file }}.pub"

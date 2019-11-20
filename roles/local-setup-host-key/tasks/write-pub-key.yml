@@ -2,7 +2,7 @@
 
 - name: Create directory for keypair
   file:
-    path: "{{ keypair_location }}"
+    path: "{{ ssh_keypair_location }}"
     state: directory
     mode: u=rwx,g=,o=
 

@@ -1,0 +1,60 @@
+---
+
+- name: Create directory for ca stuff
+  file:
+    path: "{{ ca_stuff_location }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: Generate keypair for internal CA
+  openssh_keypair:
+    type: rsa
+    state: present
+    size: 4096
+    comment: "key-ca-{{ current_inventory_env }}"
+    path: "{{ internal_ca_key_file }}"
+    owner: "{{ current_user }}"
+    mode: u=rw,g=,o=
+
+- name: Store keys in variables  
+  set_fact:
+    vault_ssh_priv: "{{ lookup('file',  '{{ internal_ca_key_file }}') }}"
+    vault_ssh_pub: "{{ lookup('file',  '{{ internal_ca_key_file }}.pub') }}"
+
+- openssl_csr:
+    # See also: https://www.openssl.org/docs/manmaster/man5/x509v3_config.html
+    path: "{{ internal_ca_csr }}"
+    privatekey_path: "{{ internal_ca_key_file }}"
+    common_name: blabla CA
+    country_name: 
+    email_address:
+    locality_name:
+    organization_name:
+    organizational_unit_name:
+    state_or_province_name:
+    subject_alt_name:
+    key_usage:
+      - keyCertSign
+      - digitalSignature
+    extended_key_usage:
+      - serverAuth
+    state: present
+
+- name: Generate a Self Signed CA certificate
+  openssl_certificate:
+    path: "{{ internal_internal_ca_cert }}"
+    privatekey_path: "{{ internal_ca_key_file }}"
+    csr_path: "{{ internal_ca_csr }}"
+    provider: selfsigned
+
+#- name: remove priv keypair from disk
+#  file:
+#    state: absent
+#    path: "{{ internal_ca_key_file }}"
+
+#- name: remove pub keypair from disk
+#  file:
+#    state: absent
+#    path: "{{ internal_ca_key_file }}.pub"
+
+

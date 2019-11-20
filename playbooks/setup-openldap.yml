@@ -4,14 +4,14 @@
   - ldap_servers
 
   vars_prompt:
-    - name: recreate_openldap_container
+    - name: recreate_openldap_container_input
       prompt: |-
               Should the OpenLDAP container be recreated if it is already there (y/n)?
       private: false
       unsafe: true
       default: "n"
 
-    - name: recreate_openldap_volumes
+    - name: recreate_openldap_volumes_input
       prompt: |-
               Recreate OpenLDAP volumes (you will loose persistent data, and container will be recreated!)?
       private: false

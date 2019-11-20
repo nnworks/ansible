@@ -1,0 +1,61 @@
+---
+
+- name: Create directory for certs stuff
+  file:
+    path: "{{ certs_stuff_location }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: Generate keypair for Cert
+  openssh_keypair:
+    type: rsa
+    state: present
+    size: 4096
+    comment: "key-cert-{{ current_inventory_env }}"
+    path: "{{ internal_cert_key_file }}"
+    owner: "{{ current_user }}"
+    mode: u=rw,g=,o=
+
+- name: Store keys in variables  
+  set_fact:
+    vault_ssh_priv: "{{ lookup('file',  '{{ internal_cert_key_file }}') }}"
+    vault_ssh_pub: "{{ lookup('file',  '{{ internal_cert_key_file }}.pub') }}"
+
+- openssl_csr:
+    # See also: https://www.openssl.org/docs/manmaster/man5/x509v3_config.html
+    path: "{{ internal_cert_csr }}"
+    privatekey_path: "{{ internal_cert_key_file }}"
+    common_name: blabla CERT
+    country_name: 
+    email_address:
+    locality_name:
+    organization_name:
+    organizational_unit_name:
+    state_or_province_name:
+    subject_alt_name:
+    key_usage:
+      - keyCertSign
+      - digitalSignature
+    extended_key_usage:
+      - serverAuth
+    state: present
+
+- name: Generate an Certificate signed with your own CA certificate
+  openssl_certificate:
+    path: "{{ internal_cert_cert }}"
+    csr_path: "{{ internal_cert_csr }}"
+    ownca_path: "{{ internal_ca_cert }}"
+    ownca_privatekey_path: "{{ internal_ca_key_file }}"
+    provider: ownca
+
+#- name: remove priv keypair from disk
+#  file:
+#    state: absent
+#    path: "{{ internal_cert_key_file }}"
+
+#- name: remove pub keypair from disk
+#  file:
+#    state: absent
+#    path: "{{ internal_cert_key_file }}.pub"
+
+

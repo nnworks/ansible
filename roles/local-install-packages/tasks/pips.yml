@@ -1,6 +1,6 @@
 ---
 
-- name: passlib
+- name: passlib pip
   pip:
     name: passlib
     state: present

@@ -14,7 +14,7 @@
     image: "{{ nginx_docker_image }}"
     state: absent  # Remove container
     keep_volumes: false
-  when: recreate_ldap_volumes == "always"
+  when: recreate_nginx_volumes == "always"
 
 # (Re)Create the data volume
 - name: Create volume for nginx data
@@ -56,13 +56,11 @@
     restart_policy: always
   register: nginx_inspect_data
 
-# Store IP address of OpenLDAP for future use
 - name: Store IP of NginX server
   set_fact: 
     nginx_ip: "{{ nginx_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
 
-# Wait for Postgresql server to respond
-- name: "Wait for NginX @ {{ nginx_ip }} : {{ nginx_docker_container_exposes_ports[0] }}"
+- name: "Wait for NginX @ {{ nginx_ip }} : {{ nginx_docker_container_exposes_ports[0] }} to repond"
   wait_for:
     host: "{{ nginx_ip }}"
     port: "{{ nginx_docker_container_exposes_ports[0] }}"
@@ -78,14 +76,12 @@
 ##################################
 
 # Get the specified image for OpenLDAP
-- name: get phpldapadmin docker image
-  docker_image: 
-    name: "{{ openldap_admin_docker_image }}"
-    tag: "{{ openldap_admin_docker_image_tag }}"
-    source: pull
+#- name: get phpldapadmin docker image
+#  docker_image: 
+#    name: "{{ openldap_admin_docker_image }}"
+#    tag: "{{ openldap_admin_docker_image_tag }}"
+#    source: pull
 
-- name "Install PHP LDAP Admin"
-osixia/phpldapadmin
 
 #- name: Create OpenLDAP entries
 #  block:

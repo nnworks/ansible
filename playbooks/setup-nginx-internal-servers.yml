@@ -4,14 +4,14 @@
   - internal_servers
 
   vars_prompt:
-    - name: recreate_nginx_container
+    - name: recreate_nginx_container_input
       prompt: |-
               Should the NginX container be recreated if it is already there (y/n)?
       private: false
       unsafe: true
       default: "n"
 
-    - name: recreate_nginx_volume
+    - name: recreate_nginx_volumes_input
       prompt: |-
               Recreate NginX volume (you will loose persistent data, and container will be recreated!)?
       private: false

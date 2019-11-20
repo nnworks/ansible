@@ -61,13 +61,11 @@
     restart_policy: always
   register: openldap_inspect_data
 
-# Store IP address of OpenLDAP for future use
 - name: Store IP of Postgresql server
   set_fact: 
     openldap_ip: "{{ openldap_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
 
-# Wait for Postgresql server to respond
-- name: "Wait for OpenLDAP @ {{ openldap_ip }} : {{ openldap_docker_container_exposes_ports[0] }}"
+- name: "Wait for OpenLDAP @ {{ openldap_ip }} : {{ openldap_docker_container_exposes_ports[0] }} to respond"
   wait_for:
     host: "{{ openldap_ip }}"
     port: "{{ openldap_docker_container_exposes_ports[0] }}"
@@ -83,7 +81,7 @@
 ##################################
 
 # Get the specified image for OpenLDAP
-- name: get phpldapadmin docker image
+- name: Get phpldapadmin docker image
   docker_image: 
     name: "{{ openldap_admin_docker_image }}"
     tag: "{{ openldap_admin_docker_image_tag }}"

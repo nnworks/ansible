@@ -1,0 +1,7 @@
+# The private key of the ansible user, multiline, indented to get a sane yaml result.
+vault_ssh_priv: |-
+  {{ vault_ssh_priv | indent(2) }}
+
+# The public key of the ansible user, multiline, indented to get a sane yaml result.
+vault_ssh_pub: |-
+  {{ vault_ssh_pub | indent(2) }}

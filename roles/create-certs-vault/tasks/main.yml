@@ -1,0 +1,8 @@
+---
+
+# Generate keypair and store it in facts / vars: vault_ssh_priv, vault_ssh_pub
+- import_tasks: generate-internal-ca.yml  
+- import_tasks: generate-internal-cert.yml  
+
+#- import_tasks: create-ca-vault.yml  
+  
