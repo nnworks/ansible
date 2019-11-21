@@ -1,3 +1,4 @@
 # value from vault (if present)
 ssh_priv: "{{ vault_ssh_priv }}"
 ssh_pub: "{{ vault_ssh_pub }}"
+int_ca_cert: "{{ vault_int_cacert }}"

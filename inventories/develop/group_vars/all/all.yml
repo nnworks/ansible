@@ -6,6 +6,10 @@ current_inventory_env: "{{ inventory_dir | basename }}"
 # resource directory
 resource_dir: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}"
 
+# CA certificates to copy to host (if needed)
+ca_certs_dir:  "{{ resource_dir }}/cacerts"
+ca_certs: "{{ query('fileglob', ca_certs_dir + '/*.crt') }}"
+
 # Current user is used for initial ssh connection.
 current_user: "{{ lookup('env','USER') }}"
 current_user_home: "{{ lookup('env','HOME') }}"

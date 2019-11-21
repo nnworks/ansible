@@ -11,11 +11,6 @@
     priv_key_file: "{{ internal_cert_priv_key_file }}"
     pub_key_file: "{{ internal_cert_pub_key_file }}"
 
-- name: Store keys in variables  
-  set_fact:
-    vault_cert_priv: "{{ lookup('file',  '{{ internal_cert_priv_key_file }}') }}"
-    vault_cert_pub: "{{ lookup('file',  '{{ internal_cert_pub_key_file }}') }}"
-
 - import_tasks: ../../common/tasks/create-cert-request.yml
   vars:
     priv_key_file: "{{ internal_cert_priv_key_file }}"
@@ -31,3 +26,8 @@
     ca_cert_file: "{{ internal_ca_cert }}"
     ca_cert_priv_key_file: "{{ internal_ca_priv_key_file }}"
 
+- name: Store keys in variables  
+  set_fact:
+    vault_int_cert_priv: "{{ lookup('file',  '{{ internal_cert_priv_key_file }}') }}"
+    vault_int_cert_pub: "{{ lookup('file',  '{{ internal_cert_pub_key_file }}') }}"
+    vault_int_cert: "{{ lookup('file',  '{{ internal_cert_cert }}') }}"

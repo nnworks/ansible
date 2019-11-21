@@ -19,7 +19,9 @@
     ansible_become_password: "{{ sudo_pass }}"
 
   roles:
+    - local-setup-int-ca-cert
     - local-install-packages
     - local-setup-host-key
+    
 
     

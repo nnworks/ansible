@@ -8,16 +8,18 @@
   connection: local
 
   vars:
+    # Internal CA certificate settings
     internal_ca_priv_key_file: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-key-priv.pem"
     internal_ca_pub_key_file: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-key-pub.pem"
     internal_ca_cert: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-cert.crt"
     internal_ca_csr: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-cert.csr"
+    # Internal certificate signed by internal CA settings
     internal_cert_priv_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key-priv.pem"
     internal_cert_pub_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key-pub.pem"
     internal_cert_cert: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert.crt"
     internal_cert_csr: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert.csr"
   
   roles:
-    #- create-secrets-vault
-    #- create-ssh-vault
+    - create-secrets-vault
+    - create-ssh-vault
     - create-certs-vault

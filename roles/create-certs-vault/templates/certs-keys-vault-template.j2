@@ -1,0 +1,25 @@
+# The private key of the internal CA certificate, multiline, indented to get a sane yaml result.
+vault_int_cacert_priv: |-
+  {{ vault_int_cacert_priv | indent(2) }}
+
+# The public key of the internal CA certificate, multiline, indented to get a sane yaml result.
+vault_int_cacert_pub: |-
+  {{ vault_int_cacert_pub | indent(2) }}
+
+# The private key of the internal certificate, multiline, indented to get a sane yaml result.
+vault_int_cert_priv: |-
+  {{ vault_int_cert_priv | indent(2) }}
+
+# The public key of the internal certificate, multiline, indented to get a sane yaml result.
+vault_int_cert_pub: |-
+  {{ vault_int_cert_pub | indent(2) }}
+
+# The internal CA certificate, multiline, indented to get a sane yaml result.
+vault_int_cacert: |-
+  {{ vault_int_cacert | indent(2) }}
+
+# The internal certificate, multiline, indented to get a sane yaml result.
+vault_int_cert: |-
+  {{ vault_int_cert | indent(2) }}
+
+

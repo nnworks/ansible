@@ -6,6 +6,10 @@
 
 ## **System (local):**
 
+**SSH**
+
+**OpenSSL**
+
 **Ansible >v2.9**
 
 **Python v3**
@@ -56,7 +60,7 @@ proxy_settings:
 ```
 
 ## CA certificates
-If other than standard CA certificates need to be installed, put them (in crt format with extention .crt) in the **certs** folder in the inventories/[develop|...|production] directory.
+If other than standard CA certificates need to be installed on the remote hosts, put them (in crt format with extention .crt) in the **resources/[develop|...|production]/cacerts** directory.
 
 # Playbooks
 
@@ -64,15 +68,17 @@ If other than standard CA certificates need to be installed, put them (in crt fo
 
 `ansible-playbook playbooks/create-vaults.yml -i inventories/[develop|...|production]`
 
-(This step is only needed when the ssh-vault.yml or secrets-vault.yml files are not present.)
+(This step is only needed when the ssh-vault.yml, secrets-vault.yml or vault-ca-certs.yml files are not present.)
 
 - Creates an ssh keypair in ~/ansible/keypairs/[develop|...|production], and creates an ssh-vault.yml, encrypted with the given password. This ssh-vault will be put in the inventories/local[develop|...|production]/group_vars/local/. Will ask for the vault password.
 - Generates a random password, and creates an secrets-vault.yml, encrypted with the given password. This secrets-vault will be put in the inventories/[develop|...|production]/group_vars/all_servers/. Will ask for the vault password.
+- generates a self signed CA certificate (for internal use) and a cetrtificate signed by the this CA. The keys and certificates are stored in the vault-ca-certs.yml file in the inventories/[develop|...|production]/group_vars/local directory. For the configuration of the generated certificates, please edit the conf files in /resources/[develop|...|production]/csr-configs directory to match your domain, names etc!
 
 `ansible-playbook playbooks/setup-local-user.yml -i inventories/[develop|...|production] --vault-id develop-ssh@prompt`
 
 (This step is only needed when the ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.priv / .pub files are not present.)
 
+- Extracts the CA certificate from vault-ca-certs.yml to the resources/[develop|...|production]/cacerts/
 - Creates ssh key files ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.priv / .pub, that will be used for configuration of the remote user's authorized_keys set.
 - Installs packages locally like pip module passlib
 
@@ -92,7 +98,7 @@ After this step, you can login as ansible (or another user specified as 'deploym
 
 `ansible-playbook playbooks/setup-remote-base.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`
 
-- Install CA certificates (*.crt) present in resources/develop/certs/
+- Install CA certificates (*.crt) present in resources/[develop|...|production]/cacerts/.
 - Upgrades the system (and restarts when packages are updated)
 - Installs a basic set of packages needed for docker etc, like aptitude, python3, some pips, LVM
 - Installs docker-compose and docker-ce. Mounts specified LVM volume as the docker directory. The docker/volumes directory is also a mount point for a specified LVM logical volume (see settings in *all-servers.yml*). The idea is that `docker volume` should be used to create persistant data volumes.

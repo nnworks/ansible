@@ -4,5 +4,5 @@
 - import_tasks: generate-internal-ca.yml  
 - import_tasks: generate-internal-cert.yml  
 
-- import_tasks: create-certkeys-vault.yml  
+- import_tasks: create-certs-keys-vault.yml  
   

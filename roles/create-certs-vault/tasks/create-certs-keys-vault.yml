@@ -12,7 +12,7 @@
 
 - name: Create vault yaml with keys
   template:
-    src: templates/certkeys-vault-template.j2
+    src: templates/certs-keys-vault-template.j2
     dest: "{{ certkeys_vault_location }}"
     owner: "{{ current_user }}"
     mode: u=rw,g=,o=
