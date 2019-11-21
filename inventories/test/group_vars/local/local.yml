@@ -18,3 +18,14 @@ secrets_vault_id: "{{ current_inventory_env }}-secrets"
 # password for the ansible user (used for sudo lateron).
 deployment_user_pass: "{{ lookup('password', '/tmp/passwordfile chars=ascii_letters length=20') }}"
 
+# CA certificate settings
+internal_ca_config: "{{ resource_dir }}/csr-configs/internal-ca.conf"
+internal_ca_days: 1825
+internal_cert_config: "{{ resource_dir }}/csr-configs/internal-cert.conf"
+internal_cert_days: 1825
+
+# name used when the ca certiciate is extracted from vault to cacerts in resources
+internal_cacerts_ca_file: "internal-ca.crt"
+
+certkeys_vault_location: "{{ inventory_dir}}/group_vars/local/vault-ca-certs.yml"
+certkeys_vault_id: "{{ current_inventory_env }}-certkeys"
