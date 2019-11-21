@@ -23,3 +23,6 @@ internal_ca_config: "{{ resource_dir }}/csr-configs/internal-ca.conf"
 internal_ca_days: 1825
 internal_cert_config: "{{ resource_dir }}/csr-configs/internal-cert.conf"
 internal_cert_days: 1825
+
+certkeys_vault_location: "{{ inventory_dir}}/group_vars/local/vault-ca-certs.yml"
+certkeys_vault_id: "{{ current_inventory_env }}-certkeys"

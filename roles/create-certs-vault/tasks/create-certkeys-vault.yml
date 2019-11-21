@@ -1,0 +1,26 @@
+---
+
+- name: Check presence of files ca-vault
+  stat:
+    path: "{{ certkeys_vault_location }}"
+  register: certkeys_vault_stat
+
+- name: File exists?
+  debug: 
+    msg: "{{ certkeys_vault_location }} already exists, this one will be used."
+  when: certkeys_vault_stat.stat.exists == true
+
+- name: Create vault yaml with keys
+  template:
+    src: templates/certkeys-vault-template.j2
+    dest: "{{ certkeys_vault_location }}"
+    owner: "{{ current_user }}"
+    mode: u=rw,g=,o=
+  when: certkeys_vault_stat.stat.exists == false
+
+- name: Encrypt vault.yml containing the keypairs for the certificates
+  shell: ansible-vault encrypt "{{ certkeys_vault_location }}" --vault-id "{{ certkeys_vault_id }}@prompt"
+  when: certkeys_vault_stat.stat.exists == false
+  
+
+  

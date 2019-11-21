@@ -7,7 +7,7 @@
 
 - name: File exists?
   debug: 
-    msg: "{{ secrets_vault_location }} already exists, this one will be used."
+    msg: "{{ ssh_vault_location }} already exists, this one will be used."
   when: ssh_vault_stat.stat.exists == true
 
 - name: Create vault yaml with keys
