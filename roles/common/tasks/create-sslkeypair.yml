@@ -1,0 +1,24 @@
+---
+
+# needs vars:
+#   priv_key_file
+#   pub_key_file
+
+- name: Generate keypair
+  shell: 
+    cmd: "{{ item[0] }}"
+    creates: "{{ item[1] }}"
+  loop: 
+    - ["openssl genpkey -algorithm RSA -out {{ priv_key_file }} -pkeyopt rsa_keygen_bits:{{ key_size }}", "{{ priv_key_file }}"]
+    - ["openssl rsa -pubout -in {{ priv_key_file }} -out {{ pub_key_file }}", "{{ pub_key_file }}"]
+  vars:
+    key_size: 4096
+
+- name: Change file permissions
+  file:
+    path: "{{ item }}"
+    mode: u=rw,g=,o=
+  loop:
+  - "{{ priv_key_file }}"
+  - "{{ pub_key_file }}"
+  

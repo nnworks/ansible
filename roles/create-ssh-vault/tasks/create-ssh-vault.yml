@@ -12,7 +12,7 @@
 
 - name: Create vault yaml with keys
   template:
-    src: templates/ssh-vault-template.yml
+    src: templates/ssh-vault-template.j2
     dest: "{{ ssh_vault_location }}"
     owner: "{{ current_user }}"
     mode: u=rw,g=,o=

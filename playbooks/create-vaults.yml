@@ -8,10 +8,12 @@
   connection: local
 
   vars:
-    internal_ca_key_file: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-key"
+    internal_ca_priv_key_file: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-key-priv.pem"
+    internal_ca_pub_key_file: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-key-pub.pem"
     internal_ca_cert: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-cert.crt"
     internal_ca_csr: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-cert.csr"
-    internal_cert_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key"
+    internal_cert_priv_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key-priv.pem"
+    internal_cert_pub_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key-pub.pem"
     internal_cert_cert: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert.crt"
     internal_cert_csr: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert.csr"
   

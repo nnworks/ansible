@@ -6,60 +6,28 @@
     state: directory
     mode: u=rwx,g=,o=
 
-- name: Generate keypair for internal CA
-  openssh_keypair:
-    type: rsa
-    state: present
-    size: 4096
-    comment: "key-ca-{{ current_inventory_env }}"
-    path: "{{ internal_ca_key_file }}"
-    owner: "{{ current_user }}"
-    mode: u=rw,g=,o=
+- import_tasks: ../../common/tasks/create-sslkeypair.yml
+  vars:
+    priv_key_file: "{{ internal_ca_priv_key_file }}"
+    pub_key_file: "{{ internal_ca_pub_key_file }}"
 
 - name: Store keys in variables  
   set_fact:
-    vault_ssh_priv: "{{ lookup('file',  '{{ internal_ca_key_file }}') }}"
-    vault_ssh_pub: "{{ lookup('file',  '{{ internal_ca_key_file }}.pub') }}"
+    vault_cacert_priv: "{{ lookup('file',  '{{ internal_ca_priv_key_file }}') }}"
+    vault_cacert_pub: "{{ lookup('file',  '{{ internal_ca_pub_key_file }}') }}"
 
-# TODO: replace by ssh commands, this does not weork relaiable on osx
-# "msg": "Could not deserialize key data." when using python3, with python2.7 it does not work at all...
+- import_tasks: ../../common/tasks/create-cert-request.yml
+  vars:
+    priv_key_file: "{{ internal_ca_priv_key_file }}"
+    csr_file: "{{ internal_ca_csr }}"
+    csr_config: "{{ internal_ca_config }}"
 
-- name: Create CA certificate request
-  openssl_csr:
-    # See also: https://www.openssl.org/docs/manmaster/man5/x509v3_config.html
-    path: "{{ internal_ca_csr }}"
-    privatekey_path: "{{ internal_ca_key_file }}"
-    common_name: blabla CA
-    country_name: 
-    email_address:
-    locality_name:
-    organization_name:
-    organizational_unit_name:
-    state_or_province_name:
-    subject_alt_name:
-    key_usage:
-      - keyCertSign
-      - digitalSignature
-    extended_key_usage:
-      - serverAuth
-    state: present
+- import_tasks: ../../common/tasks/create-cert.yml
+  vars:
+    priv_key_file: "{{ internal_ca_priv_key_file }}"
+    csr_file: "{{ internal_ca_csr }}"
+    cert_file: "{{ internal_ca_cert }}"
+    days: "{{ internal_ca_days }}"
 
-
-- name: Generate a Self Signed CA certificate
-  openssl_certificate:
-    path: "{{ internal_ca_cert }}"
-    privatekey_path: "{{ internal_ca_key_file }}"
-    csr_path: "{{ internal_ca_csr }}"
-    provider: selfsigned
-
-#- name: remove priv keypair from disk
-#  file:
-#    state: absent
-#    path: "{{ internal_ca_key_file }}"
-
-#- name: remove pub keypair from disk
-#  file:
-#    state: absent
-#    path: "{{ internal_ca_key_file }}.pub"
 
 

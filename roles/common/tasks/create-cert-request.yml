@@ -1,0 +1,18 @@
+---
+
+
+# needs vars:
+#   priv_key_file
+#   csr_file
+#   csr_config  configuration file for CSR creation
+
+- name: Generate certificate request
+  shell: 
+    cmd: "openssl req -new -key {{ priv_key_file }} -out {{ csr_file }} -config {{ csr_config }}"
+    creates: "{{ csr_file }}"
+
+- name: Change file permissions
+  file:
+    path: "{{ csr_file }}"
+    mode: u=rw,g=,o=
+  
