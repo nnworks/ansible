@@ -1,0 +1,23 @@
+---
+
+- name: Write internal CA certificate to resources directory
+  template:
+    src: templates/int-cert-template.j2
+    dest: "{{ cacerts_dir }}/{{ internal_cacerts_ca_file }}"
+    owner: "{{ current_user }}"
+    lstrip_blocks: true
+    trim_blocks: false
+    mode: u=rw,g=,o=
+  vars: 
+    cert_data: "{{ int_ca_cert }}"
+
+- name: Write certificate signed by internal CA certificate to resources directory
+  template:
+    src: templates/int-cert-template.j2
+    dest: "{{ certs_dir }}/{{ internal_certs_cert_file }}"
+    owner: "{{ current_user }}"
+    lstrip_blocks: true
+    trim_blocks: false
+    mode: u=rw,g=,o=
+  vars: 
+    cert_data: "{{ int_cert }}"

@@ -1,9 +1,5 @@
 ---
 
-# CA certificates to copy to host (if needed)
-ca_certs_dir:  "{{ resource_dir }}/cacerts"
-ca_certs: "{{ query('fileglob', ca_certs_dir + '/*.crt') }}"
-
 # proxy settings, do not set when there is no proxy
 #proxy_settings:
 #  https_proxy: http://127.0.0.1:3128

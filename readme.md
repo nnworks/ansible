@@ -78,7 +78,8 @@ If other than standard CA certificates need to be installed on the remote hosts,
 
 (This step is only needed when the ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.priv / .pub files are not present.)
 
-- Extracts the CA certificate from vault-ca-certs.yml to the resources/[develop|...|production]/cacerts/
+- Extracts the internal CA certificate from vault-ca-certs.yml to the resources/[develop|...|production]/cacerts/
+- Extracts the internal CA signed certificate from vault-ca-certs.yml to the resources/[develop|...|production]/certs/
 - Creates ssh key files ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.priv / .pub, that will be used for configuration of the remote user's authorized_keys set.
 - Installs packages locally like pip module passlib
 

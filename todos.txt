@@ -1,3 +1,7 @@
-- install nginx, db, wordpress etc...
+- docker postgresql is installed, but security needs attention, with pg_hba module, ssl with internal certificate?
+- docker nginx on internal machine with internal certificate
+- docker nginx on external machine with LetsEncrypt certifcate
+- docker wordpress install
+
 
 
