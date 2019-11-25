@@ -1,5 +1,11 @@
 ---
 
+- name: Create directory in resource tree for ca certificates
+  file:
+    path: "{{ cacerts_dir }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
 - name: Write internal CA certificate to resources directory
   template:
     src: templates/int-cert-template.j2
@@ -10,6 +16,12 @@
     mode: u=rw,g=,o=
   vars: 
     cert_data: "{{ int_ca_cert }}"
+
+- name: Create directory in resource tree for certificates
+  file:
+    path: "{{ certs_dir }}"
+    state: directory
+    mode: u=rwx,g=,o=
 
 - name: Write certificate signed by internal CA certificate to resources directory
   template:
