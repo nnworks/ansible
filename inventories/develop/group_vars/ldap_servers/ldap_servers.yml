@@ -20,5 +20,5 @@ openldap_config_volume_container_mount_point: /etc/ldap/slapd.d
 # OpenLDAP settings for general setup
 
 # Deployment hints
-recreate_ldap_container: "{{'yes' if recreate_openldap_container_input | lower is match('y|yes') else 'no'}}"
-recreate_ldap_volumes: "{{'always' if recreate_openldap_volumes_input | lower is match('y|yes') else 'never'}}"
+recreate_openldap_container: "{{'yes' if recreate_openldap_container_input | lower is match('y|yes') else 'no'}}"
+recreate_openldap_volumes: "{{'always' if recreate_openldap_volumes_input | lower is match('y|yes') else 'never'}}"

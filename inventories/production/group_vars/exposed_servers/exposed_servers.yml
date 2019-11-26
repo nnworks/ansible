@@ -23,8 +23,8 @@ openldap_postgres_dbuser: postgres1
 openldap_postgres_password: "12345"
 
 # Deployment hints
-recreate_ldap_container: "{{'yes' if recreate_openldap_container | lower is match('y|yes') else 'no'}}"
-recreate_ldap_volumes: "{{'always' if recreate_openldap_volumes | lower is match('y|yes') else 'never'}}"
+recreate_openldap_container: "{{'yes' if recreate_openldap_container | lower is match('y|yes') else 'no'}}"
+recreate_openldap_volumes: "{{'always' if recreate_openldap_volumes | lower is match('y|yes') else 'never'}}"
 
 # create 
 

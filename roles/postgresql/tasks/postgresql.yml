@@ -44,14 +44,16 @@
     keep_volumes: false
   when: recreate_postgresql_volume == "always"
 
-# (Re)Create the data volume
-- name: Create volume for postgres data
+# (Re)Create the volumes
+- name: Create volumes for postgres
   docker_volume:
-    name: "{{ db_data_volume_name }}"
+    name: "{{ item }}"
     state: present
     driver: local
     recreate: "{{ recreate_postgresql_volume }}"
-    
+  loop:
+    - "{{ db_data_volume_name }}"
+
 # Get the specified image for Postgresql
 - name: get postgresql docker image
   docker_image: 

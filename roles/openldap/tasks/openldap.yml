@@ -19,7 +19,7 @@
     image: "{{ openldap_docker_image }}"
     state: absent  # Remove container
     keep_volumes: false
-  when: recreate_ldap_volumes == "always"
+  when: recreate_openldap_volumes == "always"
 
 # (Re)Create the data volume
 - name: Create volume for openldap data
@@ -27,7 +27,7 @@
     name: "{{ item }}"
     state: present
     driver: local
-    recreate: "{{ recreate_ldap_volumes }}"
+    recreate: "{{ recreate_openldap_volumes }}"
   loop: 
    - openldap_data_volume_name
    - openldap_config_volume_name
@@ -45,7 +45,7 @@
     name: "{{ openldap_docker_container_name }}"
     image: "{{ openldap_docker_image }}"
     state: started
-    recreate: "{{ recreate_ldap_container }}"
+    recreate: "{{ recreate_openldap_container }}"
     memory: "{{ openldap_max_memory }}"
     mounts: 
       - source: "{{ openldap_data_volume_name }}"
@@ -80,15 +80,50 @@
 #
 ##################################
 
-# Get the specified image for OpenLDAP
-- name: Get phpldapadmin docker image
-  docker_image: 
-    name: "{{ openldap_admin_docker_image }}"
-    tag: "{{ openldap_admin_docker_image_tag }}"
-    source: pull
+- name: Make sure we have an admin user
+  ldap_entry:
+    dn: cn=admin,dc=example,dc=com
+    objectClass:
+      - simpleSecurityObject
+      - organizationalRole
+    attributes:
+      description: An LDAP administrator
+      userPassword: "{SSHA}tabyipcHzhwESzRaGA7oQ/SDoBZQOGND"
 
-- name "Install PHP LDAP Admin"
-osixia/phpldapadmin
+
+- name: Make sure we have a parent entry for users
+  ldap_entry:
+    dn: ou=users,dc=example,dc=com
+    objectClass: organizationalUnit
+
+- name: Make sure we have an admin user
+  ldap_entry:
+    dn: cn=admin,dc=example,dc=com
+    objectClass:
+      - simpleSecurityObject
+      - organizationalRole
+    attributes:
+      description: An LDAP administrator
+      userPassword: "{SSHA}tabyipcHzhwESzRaGA7oQ/SDoBZQOGND"
+
+- name: Get rid of an old entry
+  ldap_entry:
+    dn: ou=stuff,dc=example,dc=com
+    state: absent
+    server_uri: ldap://localhost/
+    bind_dn: cn=admin,dc=example,dc=com
+    bind_pw: password
+
+
+# Get the specified image for OpenLDAP admin 
+#- name: Get phpldapadmin docker image
+#  docker_image: 
+#    name: "{{ openldap_admin_docker_image }}"
+#    tag: "{{ openldap_admin_docker_image_tag }}"
+#    source: pull
+
+#- name "Install PHP LDAP Admin"
+#osixia/phpldapadmin
 
 #- name: Create OpenLDAP entries
 #  block:

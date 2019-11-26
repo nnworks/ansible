@@ -16,16 +16,17 @@
     keep_volumes: false
   when: recreate_nginx_volumes == "always"
 
-# (Re)Create the data volume
-- name: Create volume for nginx data
+# (Re)Create the volumes
+- name: Create volumes for nginx
   docker_volume:
     name: "{{ item }}"
     state: present
     driver: local
     recreate: "{{ recreate_nginx_volumes }}"
   loop: 
-   - nginx_site_data_volume_name
-   - nginx_config_volume_name
+   - "{{ nginx_site_data_volume_name }}"
+   - "{{ nginx_config_volume_name }}"
+   - "{{ nginx_logging_volume_name }}"
     
 # Get the specified image for NginX
 - name: get nginx docker image
@@ -48,6 +49,9 @@
         type: volume
       - source: "{{ nginx_config_volume_name }}"
         target: "{{ nginx_config_volume_container_mount_point }}"
+        type: volume
+      - source: "{{ nginx_logging_volume_name }}"
+        target: "{{ nginx_logging_volume_container_mount_point }}"
         type: volume
     hostname: "{{ nginx_docker_container_hostname }}"
     exposed_ports: "{{ nginx_docker_container_exposes_ports }}"
@@ -83,11 +87,6 @@
 
 # Add SSL certificate and key to /etc/nginx (configured in nginx_config_volume_container_mount_point)
 
-- name:
-  debug:
-    msg: "{{ config_volume_data.volume.Mountpoint }}"
-
-
 - name: Create directory ssl directory for NginX
   file:
     path: "{{ config_volume_patch }}/ssl"
@@ -108,6 +107,9 @@
   loop:
     - "{{ certs_dir }}/{{ internal_certs_cert_file }}"
     - "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key-priv.pem"
+
+
+
 
 # Get the specified image for OpenLDAP
 #- name: get phpldapadmin docker image

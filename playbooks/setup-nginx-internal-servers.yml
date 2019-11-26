@@ -13,7 +13,7 @@
 
     - name: recreate_nginx_volumes_input
       prompt: |-
-              Recreate NginX volume (you will loose persistent data, and container will be recreated!)?
+              Recreate NginX volumes (you will loose persistent config / data / logging, and container will be recreated!)?
       private: false
       unsafe: true
       confirm: yes

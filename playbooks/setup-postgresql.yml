@@ -13,7 +13,7 @@
 
     - name: recreate_postgresql_volume_input
       prompt: |-
-              Recreate PostgreSQL volume (you will loose persistent data, and container will be recreated!)?
+              Recreate PostgreSQL volumes (you will loose persistent data / logging, and container will be recreated!)?
       private: false
       unsafe: true
       confirm: yes
