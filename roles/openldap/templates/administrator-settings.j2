@@ -1,0 +1,14 @@
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcSuffix
+olcSuffix: "{{ suffix }}"
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootDN
+olcRootDN: "{{ rootDN }}"
+
+dn: olcDatabase={2}hdb,cn=config
+changeType: modify
+add: olcRootPW
+olcRootPW: "{{ hashed_password }}"

@@ -104,6 +104,17 @@ After this step, you can login as ansible (or another user specified as 'deploym
 - Installs a basic set of packages needed for docker etc, like aptitude, python3, some pips, LVM
 - Installs docker-compose and docker-ce. Mounts specified LVM volume as the docker directory. The docker/volumes directory is also a mount point for a specified LVM logical volume (see settings in *all-servers.yml*). The idea is that `docker volume` should be used to create persistant data volumes.
 
+
+## 3) Remote installation of an OpenLDAP service
+WIP: see :
+https://www.golinuxcloud.com/install-and-configure-openldap-centos-7-linux/
+https://www.digitalocean.com/community/tutorials/how-to-change-account-passwords-on-an-openldap-server
+http://techiezone.rottigni.net/2011/12/change-root-dn-password-on-openldap/
+
+`sudo docker exec openldap ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*`
+
+
+
 ## 3) Remote installation of a PostgreSQL database.
 
 `ansible-playbook playbooks/setup-db.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`

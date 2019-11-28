@@ -3,9 +3,11 @@
 # Some prerequisites
 - name: Install python3-ldap
   apt:
-    name: python3-ldap
+    name: "{{ item }}"
     state: latest 
     update_cache: false 
+  loop:
+    - python3-ldap
 
 ########################################
 # Create data volumes for OpenLDAP
@@ -29,8 +31,8 @@
     driver: local
     recreate: "{{ recreate_openldap_volumes }}"
   loop: 
-   - openldap_data_volume_name
-   - openldap_config_volume_name
+   - "{{ openldap_data_volume_name }}"
+   - "{{ openldap_config_volume_name }}"
     
 # Get the specified image for OpenLDAP
 - name: get openldap docker image
@@ -77,8 +79,63 @@
   retries: 10
 
 ##################################
-#
+# Configuration
 ##################################
+
+# create config directory in ldap config volume
+# Admin password
+
+# create
+
+# Get path to config volume for openldap container 
+- name:
+  docker_volume_info:
+    name: "{{ openldap_config_volume_name }}"
+  register: config_volume_data
+
+- name: "Create diretcory for custom config ldif filesystem ({{ config_volume_patch }}/custom-config/)"
+  file:
+    state: directory
+    path: "{{ config_volume_patch }}/custom-config/"
+  vars:
+    config_volume_patch: "{{ config_volume_data.volume.Mountpoint }}"
+
+# sudo docker exec openldap slappasswd -s "1234" returns the hashed password.
+- name: Generate password for administrator user
+  shell: 
+    cmd: "docker exec openldap slappasswd -s '{{ openldap_admin_password }}'"
+  register: hashed_password
+
+- name: Set up an administrator user
+  ldap_attr:
+    server_uri: ldap://localhost/
+    bind_dn: cn=admin,dc=example,dc=com
+    dn: olcDatabase={1}hdb,cn=config
+    name: "{{ item.key }}"
+    values: "{{ item.value }}"
+    state: exact
+  with_dict:
+    olcRootDN: "cn=admin, {{ openldap_dc_string }}"
+    olcRootPW: "{{ hashed_password }}"
+    olcSuffix: "{{ openldap_dc_string }}"
+
+
+#- name: Generate ldif file to change administrator suffix, roodDN and password, 
+#  template:
+#    src: templates/administrator-settings.j2
+#    dest: "{{ certkeys_vault_location }}"
+#    owner: "{{ current_user }}"
+#    mode: u=rw,g=,o=
+#  vars:
+#    hashed_password: "{{ hashed_password }}"
+#    suffix: "{{ openldap_dc_string }}"
+#    rootDN: "cn=admin, {{ openldap_dc_string }}"
+#    file_path: "{{ config_volume_patch }}/custom-config/administrator-settings.ldif"
+#  loop:
+
+#- name: copy ldif to 
+#    src 
+#  vars:
 
 - name: Make sure we have an admin user
   ldap_entry:
@@ -89,7 +146,6 @@
     attributes:
       description: An LDAP administrator
       userPassword: "{SSHA}tabyipcHzhwESzRaGA7oQ/SDoBZQOGND"
-
 
 - name: Make sure we have a parent entry for users
   ldap_entry:

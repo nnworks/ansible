@@ -17,8 +17,11 @@ openldap_config_volume_name: openldap-config
 openldap_data_volume_container_mount_point: /var/lib/ldap
 openldap_config_volume_container_mount_point: /etc/ldap/slapd.d
 
-# OpenLDAP settings for general setup
-
 # Deployment hints
 recreate_openldap_container: "{{'yes' if recreate_openldap_container_input | lower is match('y|yes') else 'no'}}"
 recreate_openldap_volumes: "{{'always' if recreate_openldap_volumes_input | lower is match('y|yes') else 'never'}}"
+
+# OpenLDAP settings for general setup
+openldap_admin_password: "{{ openldap_admin_pass_input }}"
+openldap_initial_dc_string: "dc=example,dc=org"
+openldap_dc_string: "dc=nnworks, dc=nl" 

@@ -19,6 +19,14 @@
       confirm: yes
       default: "n"
 
+    - name: openldap_admin_pass_input
+      prompt: |-
+              Please give a password for the OpenLDAP administrator?
+      private: true
+      unsafe: true
+      confirm: yes
+      default: ""
+
   vars:
     # sudo to ansible user to copy public key into authorized_keys
     ansible_become: true
