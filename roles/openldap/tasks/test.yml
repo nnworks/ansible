@@ -3,7 +3,7 @@
 
 - name: Set up an administrator user (1)
   ldap_attr:
-    server_uri: ldap://localhost/
+    server_uri: ldapi:///
     bind_dn: "{{ openldap_initial_dc_string }}"
     bind_pw: redhat
     dn: "olcDatabase={1}mdb,cn=config"

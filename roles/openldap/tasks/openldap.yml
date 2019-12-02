@@ -49,6 +49,21 @@
     state: started
     recreate: "{{ recreate_openldap_container }}"
     memory: "{{ openldap_max_memory }}"
+    env:
+      LDAP_ORGANISATION: "DefaultCompany"
+      LDAP_DOMAIN: "default.nl"
+      LDAP_BASE_DN: "default.nl"
+      LDAP_ADMIN_PASSWORD: "1234"
+      LDAP_CONFIG_PASSWORD: "1234"
+      LDAP_BACKEND: "mdb"
+      #LDAP_TLS: "true"
+      #LDAP_TLS_CRT_FILENAME: "mycrt.crt"
+      #LDAP_TLS_KEY_FILENAME: "{{ openldap_config_volume_name }}mycrt.priv.key"
+      #LDAP_TLS_DH_PARAM_FILENAME: "my-dhparam.pem"
+      #LDAP_TLS_CA_CRT_FILENAME: "myca.crt"
+      #LDAP_TLS_ENFORCE: "true"
+      #LDAP_TLS_CIPHER_SUITE: "SECURE256:+SECURE128:-VERS-TLS-ALL:+VERS-TLS1.2:-RSA:-DHE-DSS:-CAMELLIA-128-CBC:-CAMELLIA-256-CBC"
+      #LDAP_TLS_VERIFY_CLIENT: "demand"
     mounts: 
       - source: "{{ openldap_data_volume_name }}"
         target: "{{ openldap_data_volume_container_mount_point }}"
@@ -67,25 +82,53 @@
   set_fact: 
     openldap_ip: "{{ openldap_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
 
-- name: "Wait for OpenLDAP @ {{ openldap_ip }} : {{ openldap_docker_container_exposes_ports[0] }} to respond"
-  wait_for:
-    host: "{{ openldap_ip }}"
-    port: "{{ openldap_docker_container_exposes_ports[0] }}"
-    state: drained
-    connect_timeout: 1
-    timeout: 30
-  register: openldap_responding
-  until: openldap_responding is success
+#- name: "Wait for OpenLDAP @ {{ openldap_ip }} : {{ openldap_docker_container_exposes_ports[0] }} to respond"
+#  wait_for:
+#    host: "{{ openldap_ip }}"
+#    port: "{{ openldap_docker_container_exposes_ports[0] }}"
+#    state: drained
+#    connect_timeout: 1
+#    timeout: 30
+#  register: openldap_responding
+#  until: openldap_responding is success
+#  retries: 10
+
+- name: Wait for OpenLDAP container to be fully started
+  docker_container_info:
+    name: "{{ openldap_docker_container_name }}"
+  register: result
+  until: result.container.State.Status == 'running'
   retries: 10
+
+- name: test
+  debug:
+    msg: "{{ result.container.State }}"
+
 
 ##################################
 # Configuration
 ##################################
 
+- name: 
+  command: |
+    "docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldap:// -x -D \"cn=admin,dc=default,dc=nl\" -w 1234
+     
+     dn: cn=admin,dc=default,dc=nl
+     changetype: modify
+     replace: userPassword
+     userPassword: {SSHA}lieJW/YlN5ps6Gn533tJuyY6iRtgSTQw
+     "
+  become: true
+  become_user: root
+  register: ldapsearch
+
+- name: test
+  debug:
+    msg: "{{ ldapsearch }}"
+
+
 # create config directory in ldap config volume
 # Admin password
-
-# create
 
 # Get path to config volume for openldap container 
 - name:
@@ -105,6 +148,7 @@
   shell: 
     cmd: "docker exec openldap slappasswd -s '{{ openldap_admin_password }}'"
   register: hashed_password
+
 
 - name: Set up an administrator user
   ldap_attr:
