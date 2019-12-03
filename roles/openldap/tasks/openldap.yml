@@ -82,17 +82,6 @@
   set_fact: 
     openldap_ip: "{{ openldap_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
 
-#- name: "Wait for OpenLDAP @ {{ openldap_ip }} : {{ openldap_docker_container_exposes_ports[0] }} to respond"
-#  wait_for:
-#    host: "{{ openldap_ip }}"
-#    port: "{{ openldap_docker_container_exposes_ports[0] }}"
-#    state: drained
-#    connect_timeout: 1
-#    timeout: 30
-#  register: openldap_responding
-#  until: openldap_responding is success
-#  retries: 10
-
 - name: Wait for OpenLDAP container to be fully started
   docker_container_info:
     name: "{{ openldap_docker_container_name }}"
@@ -100,35 +89,46 @@
   until: result.container.State.Status == 'running'
   retries: 10
 
-- name: test
-  debug:
-    msg: "{{ result.container.State }}"
-
+- name: "Wait for OpenLDAP ldapi:// to be present"
+  shell: "docker exec openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b cn=admin,dc=default,dc=nl"
+  become: true
+  become_user: root #TODO fix docker user
+  register: ldapi_responding
+  until: ldapi_responding is success
+  retries: 10
 
 ##################################
 # Configuration
 ##################################
 
+# create config directory in ldap config volume
+# Admin password
 - name: 
-  command: |
-    "docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldap:// -x -D \"cn=admin,dc=default,dc=nl\" -w 1234
-     
-     dn: cn=admin,dc=default,dc=nl
-     changetype: modify
-     replace: userPassword
-     userPassword: {SSHA}lieJW/YlN5ps6Gn533tJuyY6iRtgSTQw
-     "
+  shell: |
+      docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -x -D cn=admin,dc=default,dc=nl -w 1234 <<EOF
+      dn: cn=admin,dc=default,dc=nl
+      changetype: modify
+      replace: userPassword
+      userPassword: {SSHA}lieJW/YlN5ps6Gn533tJuyY6iRtgSTQw
+      EOF
   become: true
-  become_user: root
-  register: ldapsearch
+  become_user: root #TODO fix docker user
+
+# Admin password
+- name: 
+  shell: |
+      docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -x -D cn=config,dc=default,dc=nl -w 5678 <<EOF
+      dn: cn=admin,dc=default,dc=nl
+      changetype: modify
+      replace: userPassword
+      userPassword: {SSHA}lieJW/YlN5ps6Gn533tJuyY6iRtgSTQw
+      EOF
+  become: true
+  become_user: root #TODO fix docker user
 
 - name: test
   debug:
     msg: "{{ ldapsearch }}"
-
-
-# create config directory in ldap config volume
-# Admin password
 
 # Get path to config volume for openldap container 
 - name:
@@ -136,7 +136,7 @@
     name: "{{ openldap_config_volume_name }}"
   register: config_volume_data
 
-- name: "Create diretcory for custom config ldif filesystem ({{ config_volume_patch }}/custom-config/)"
+- name: "Create directory for custom config ldif filesystem ({{ config_volume_patch }}/custom-config/)"
   file:
     state: directory
     path: "{{ config_volume_patch }}/custom-config/"

@@ -109,6 +109,7 @@ After this step, you can login as ansible (or another user specified as 'deploym
 WIP: see :
 https://www.golinuxcloud.com/install-and-configure-openldap-centos-7-linux/
 https://www.digitalocean.com/community/tutorials/how-to-change-account-passwords-on-an-openldap-server
+https://www.digitalocean.com/community/tutorials/how-to-manage-and-use-ldap-servers-with-openldap-utilities
 http://techiezone.rottigni.net/2011/12/change-root-dn-password-on-openldap/
 
 `sudo docker exec openldap ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*`
