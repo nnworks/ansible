@@ -23,5 +23,4 @@ recreate_openldap_volumes: "{{'always' if recreate_openldap_volumes_input | lowe
 
 # OpenLDAP settings for general setup
 openldap_admin_password: "{{ openldap_admin_pass_input }}"
-openldap_initial_dc_string: "dc=example,dc=org"
 openldap_dc_string: "dc=nnworks, dc=nl" 

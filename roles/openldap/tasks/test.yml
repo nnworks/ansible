@@ -21,7 +21,7 @@
 #- name: Set up an administrator user (1)
 #  ldap_attr:
 #    server_uri: ldapi:///
-#    bind_dn: "{{ openldap_initial_dc_string }}"
+#    bind_dn: "{{ openldap_dc_string }}"
 #    bind_pw: redhat
 #    dn: "olcDatabase={1}mdb,cn=config"
 #    name: "{{ item.key }}"
@@ -33,7 +33,7 @@
 #- name: Set up an administrator user (2)
 #  ldap_attr:
 #    server_uri: ldap://localhost/
-#    bind_dn: "{{ openldap_initial_dc_string }}"
+#    bind_dn: "{{ openldap_dc_string }}"
 #    bind_pw: "admin"
 #    dn: "olcDatabase={1}mdb,cn=config"
 #    name: "{{ item.key }}"

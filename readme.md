@@ -106,13 +106,46 @@ After this step, you can login as ansible (or another user specified as 'deploym
 
 
 ## 3) Remote installation of an OpenLDAP service
-WIP: see :
+For more info see :
 https://www.golinuxcloud.com/install-and-configure-openldap-centos-7-linux/
 https://www.digitalocean.com/community/tutorials/how-to-change-account-passwords-on-an-openldap-server
 https://www.digitalocean.com/community/tutorials/how-to-manage-and-use-ldap-servers-with-openldap-utilities
 http://techiezone.rottigni.net/2011/12/change-root-dn-password-on-openldap/
 
 `sudo docker exec openldap ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*`
+
+Some LDAP basic info: 
+
+DIT: Directory Information Tree, root of a tree of entries stored in ldap
+
+Authentication to LDAP:
+- Anonymous (no auth), normally read-only for public-facing DIT. (use ldapsearch ... -x)
+- Simple: username is DN (distinguished name) + password
+- SASL: Simple Authentication and Security Layer: Several mechanisms like *EXTERNAL*
+
+Find the DIT root entry (using the anonymous binding):
+
+`sudo docker exec openldap ldapsearch -H ldap://localhost -x -LLL -s base -b "" namingContexts`
+
+Will return something like:
+```  
+dn
+namingContexts: dc=default,dc=nl
+```
+Find an simpleSecurityObject (used for uname/password config) entry to bind with under the DIT looked up above (use -b to bind to a specific DIT dn)
+
+`sudo docker exec openldap ldapsearch -H ldap://localhost -x -LLL -b "dc=default,dc=nl" "(objectClass=simpleSecurityObject)" dn`
+
+Will return something like:
+```
+dn: cn=admin,dc=default,dc=nl
+```
+`sudo docker exec --interactive openldap ldapsearch -H ldap://localhost -x -D "cn=admin,dc=example,dc=com" -W`
+    
+or
+
+`sudo docker exec openldap ldapsearch -H ldap://localhost -x -D "cn=admin,dc=default,dc=nl" -w 1234`
+
 
 
 

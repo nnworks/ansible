@@ -1,2 +1,6 @@
 ---
 
+install_organisation: "DefaultCompany"
+install_domain: "default.nl"
+install_base_dn: "default.nl"
+install_backend_db: "mdb"

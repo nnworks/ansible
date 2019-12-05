@@ -18,7 +18,7 @@
 - name: "Stop docker container {{ openldap_docker_container_name }}"
   docker_container:
     name: "{{ openldap_docker_container_name }}"
-    image: "{{ openldap_docker_image }}"
+    #image: "{{ openldap_docker_image }}"
     state: absent  # Remove container
     keep_volumes: false
   when: recreate_openldap_volumes == "always"
@@ -50,12 +50,10 @@
     recreate: "{{ recreate_openldap_container }}"
     memory: "{{ openldap_max_memory }}"
     env:
-      LDAP_ORGANISATION: "DefaultCompany"
-      LDAP_DOMAIN: "default.nl"
-      LDAP_BASE_DN: "default.nl"
-      LDAP_ADMIN_PASSWORD: "1234"
-      LDAP_CONFIG_PASSWORD: "1234"
-      LDAP_BACKEND: "mdb"
+      LDAP_ORGANISATION: "{{ install_organisation }}"
+      LDAP_DOMAIN: "{{ install_domain }}"
+      LDAP_BASE_DN: "{{ install_base_dn }}"
+      LDAP_BACKEND: "{{ install_backend_db }}"
       #LDAP_TLS: "true"
       #LDAP_TLS_CRT_FILENAME: "mycrt.crt"
       #LDAP_TLS_KEY_FILENAME: "{{ openldap_config_volume_name }}mycrt.priv.key"
@@ -78,8 +76,7 @@
     restart_policy: always
   register: openldap_inspect_data
 
-- name: Store IP of Postgresql server
-  set_fact: 
+- set_fact:
     openldap_ip: "{{ openldap_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
 
 - name: Wait for OpenLDAP container to be fully started
@@ -89,8 +86,11 @@
   until: result.container.State.Status == 'running'
   retries: 10
 
+- set_fact:
+    install_domain_dc: "dc={{ install_domain.split('.') | join(',dc=') }}"
+
 - name: "Wait for OpenLDAP ldapi:// to be present"
-  shell: "docker exec openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b cn=admin,dc=default,dc=nl"
+  shell: "docker exec openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b cn=admin,{{ install_domain_dc }}"
   become: true
   become_user: root #TODO fix docker user
   register: ldapi_responding
@@ -101,37 +101,55 @@
 # Configuration
 ##################################
 
+
 # create config directory in ldap config volume
 # Admin password
-- name: 
+
+# Create hash of the password.
+- name: Generate password for administrator user
+  shell: 
+    cmd: "docker exec openldap slappasswd -s '{{ openldap_admin_password }}'"
+  register: openldap_admin_config_password_hashed
+
+- name: search for rootDN dn and configDIT dn
   shell: |
-      docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -x -D cn=admin,dc=default,dc=nl -w 1234 <<EOF
-      dn: cn=admin,dc=default,dc=nl
-      changetype: modify
-      replace: userPassword
-      userPassword: {SSHA}lieJW/YlN5ps6Gn533tJuyY6iRtgSTQw
-      EOF
+      docker exec --interactive {{ openldap_docker_container_name }} ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" dn olcRootDN olcRootPW
   become: true
   become_user: root #TODO fix docker user
+  register: result
 
-# Admin password
-- name: 
-  shell: |
-      docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -x -D cn=config,dc=default,dc=nl -w 5678 <<EOF
-      dn: cn=admin,dc=default,dc=nl
-      changetype: modify
-      replace: userPassword
-      userPassword: {SSHA}lieJW/YlN5ps6Gn533tJuyY6iRtgSTQw
-      EOF
-  become: true
-  become_user: root #TODO fix docker user
+- set_fact:
+    rootDN_dn: "{{ result.stdout_lines | select('match','^dn: .*(mdb,).*') | first }}"
+    configDIT_dn: "{{ result.stdout_lines | select('match','^dn: .*(config,).*') | first }}"
+    openldap_admin_config_password_hashed: "{{ openldap_admin_config_password_hashed.stdout }}"
 
-- name: test
-  debug:
-    msg: "{{ ldapsearch }}"
-
-# Get path to config volume for openldap container 
 - name:
+  debug:
+    msg: "{{ openldap_admin_password }} and {{ openldap_admin_config_password_hashed }}"
+
+# - name: Change RootDN admin password
+#   shell: |
+#       docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -Y EXTERNAL <<EOF
+#       {{ rootDN_dn }}
+#       changetype: modify
+#       replace: olcRootPW
+#       olcRootPW: {{ openldap_admin_config_password_hashed }}
+#       EOF
+#   become: true
+#   become_user: root #TODO fix docker user
+
+# - name: Change ConfigDIT admin password
+#   shell: |
+#       docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -Y EXTERNAL <<EOF
+#       {{ configDIT_dn }}
+#       changetype: modify
+#       replace: olcRootPW
+#       olcRootPW: {{ openldap_admin_config_password_hashed }}
+#       EOF
+#   become: true
+#   become_user: root #TODO fix docker user
+
+- name: Get path to config volume for openldap container 
   docker_volume_info:
     name: "{{ openldap_config_volume_name }}"
   register: config_volume_data
@@ -143,25 +161,25 @@
   vars:
     config_volume_patch: "{{ config_volume_data.volume.Mountpoint }}"
 
-# sudo docker exec openldap slappasswd -s "1234" returns the hashed password.
-- name: Generate password for administrator user
-  shell: 
-    cmd: "docker exec openldap slappasswd -s '{{ openldap_admin_password }}'"
-  register: hashed_password
+- name: "Restart docker container {{ openldap_docker_container_name }}"
+  docker_container:
+    name: "{{ openldap_docker_container_name }}"
+    state: started
+    restart: true
 
 
-- name: Set up an administrator user
-  ldap_attr:
-    server_uri: ldap://localhost/
-    bind_dn: cn=admin,dc=example,dc=com
-    dn: olcDatabase={1}hdb,cn=config
-    name: "{{ item.key }}"
-    values: "{{ item.value }}"
-    state: exact
-  with_dict:
-    olcRootDN: "cn=admin, {{ openldap_dc_string }}"
-    olcRootPW: "{{ hashed_password }}"
-    olcSuffix: "{{ openldap_dc_string }}"
+# - name: Set up an administrator user
+#   ldap_attr:
+#     server_uri: ldap://localhost/
+#     bind_dn: cn=admin,dc=example,dc=com
+#     dn: olcDatabase={1}hdb,cn=config
+#     name: "{{ item.key }}"
+#     values: "{{ item.value }}"
+#     state: exact
+#   with_dict:
+#     olcRootDN: "cn=admin, {{ openldap_dc_string }}"
+#     olcRootPW: "{{ hashed_password }}"
+#     olcSuffix: "{{ openldap_dc_string }}"
 
 
 #- name: Generate ldif file to change administrator suffix, roodDN and password, 
@@ -181,38 +199,38 @@
 #    src 
 #  vars:
 
-- name: Make sure we have an admin user
-  ldap_entry:
-    dn: cn=admin,dc=example,dc=com
-    objectClass:
-      - simpleSecurityObject
-      - organizationalRole
-    attributes:
-      description: An LDAP administrator
-      userPassword: "{SSHA}tabyipcHzhwESzRaGA7oQ/SDoBZQOGND"
+# - name: Make sure we have an admin user
+#   ldap_entry:
+#     dn: cn=admin,dc=example,dc=com
+#     objectClass:
+#       - simpleSecurityObject
+#       - organizationalRole
+#     attributes:
+#       description: An LDAP administrator
+#       userPassword: "{SSHA}tabyipcHzhwESzRaGA7oQ/SDoBZQOGND"
 
-- name: Make sure we have a parent entry for users
-  ldap_entry:
-    dn: ou=users,dc=example,dc=com
-    objectClass: organizationalUnit
+# - name: Make sure we have a parent entry for users
+#   ldap_entry:
+#     dn: ou=users,dc=example,dc=com
+#     objectClass: organizationalUnit
 
-- name: Make sure we have an admin user
-  ldap_entry:
-    dn: cn=admin,dc=example,dc=com
-    objectClass:
-      - simpleSecurityObject
-      - organizationalRole
-    attributes:
-      description: An LDAP administrator
-      userPassword: "{SSHA}tabyipcHzhwESzRaGA7oQ/SDoBZQOGND"
+# - name: Make sure we have an admin user
+#   ldap_entry:
+#     dn: cn=admin,dc=example,dc=com
+#     objectClass:
+#       - simpleSecurityObject
+#       - organizationalRole
+#     attributes:
+#       description: An LDAP administrator
+#       userPassword: "{SSHA}tabyipcHzhwESzRaGA7oQ/SDoBZQOGND"
 
-- name: Get rid of an old entry
-  ldap_entry:
-    dn: ou=stuff,dc=example,dc=com
-    state: absent
-    server_uri: ldap://localhost/
-    bind_dn: cn=admin,dc=example,dc=com
-    bind_pw: password
+# - name: Get rid of an old entry
+#   ldap_entry:
+#     dn: ou=stuff,dc=example,dc=com
+#     state: absent
+#     server_uri: ldap://localhost/
+#     bind_dn: cn=admin,dc=example,dc=com
+#     bind_pw: password
 
 
 # Get the specified image for OpenLDAP admin 
