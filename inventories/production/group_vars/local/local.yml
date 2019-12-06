@@ -24,5 +24,6 @@ internal_ca_days: 1825
 internal_cert_config: "{{ resource_dir }}/csr-configs/internal-cert.conf"
 internal_cert_days: 1825
 
+# name used when the ca certificate is extracted from vault to cacerts in resources
 certkeys_vault_location: "{{ inventory_dir}}/group_vars/local/vault-ca-certs.yml"
 certkeys_vault_id: "{{ current_inventory_env }}-certkeys"

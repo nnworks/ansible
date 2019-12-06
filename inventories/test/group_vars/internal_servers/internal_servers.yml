@@ -1,5 +1,8 @@
 ---
 
+#######################
+# NginX
+#######################
 # NginX image settings
 nginx_docker_image: nginx
 nginx_docker_image_tag: alpine
@@ -22,3 +25,5 @@ nginx_logging_volume_container_mount_point: /var/log/nginx
 # Deployment hints
 recreate_nginx_container: "{{'yes' if recreate_nginx_container_input | lower is match('y|yes') else 'no'}}"
 recreate_nginx_volumes: "{{'always' if recreate_nginx_volumes_input | lower is match('y|yes') else 'never'}}"
+
+#######################
