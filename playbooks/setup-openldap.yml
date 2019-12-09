@@ -19,9 +19,15 @@
       confirm: yes
       default: "n"
 
+    - name: openldap_domain_input
+      prompt: |-
+              Please give the domain name for the OpenLDAP server
+      private: false
+      unsafe: false
+
     - name: openldap_admin_pass_input
       prompt: |-
-              Please give a password for the OpenLDAP administrator?
+              Please give a password for the OpenLDAP administrator
       private: true
       unsafe: true
       confirm: yes
