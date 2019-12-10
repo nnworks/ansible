@@ -1,5 +1,10 @@
 ---
 
+- name: Check domain name
+  fail:
+    msg: "Please give a valid domain name"
+  when: openldap_domain_input is not match(".*\..*")
+
 # Some prerequisites
 - name: Install python3-ldap
   apt:
@@ -88,6 +93,7 @@
 
 - set_fact:
     install_domain_dc: "dc={{ install_domain.split('.') | join(',dc=') }}"
+    new_openldap_domain_dc: "dc={{ openldap_domain_input.split('.') | join(',dc=') }}"
 
 - name: "Wait for OpenLDAP ldapi:// to be present"
   shell: "docker exec openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b cn=admin,{{ install_domain_dc }}"
@@ -109,7 +115,7 @@
 - name: Generate password for administrator user
   shell: 
     cmd: "docker exec openldap slappasswd -s '{{ openldap_admin_password }}'"
-  register: openldap_admin_config_password_hashed
+  register: openldap_admin_password_hashed
 
 - name: search for rootDN dn and configDIT dn
   shell: |
@@ -121,33 +127,62 @@
 - set_fact:
     rootDN_dn: "{{ result.stdout_lines | select('match','^dn: .*(mdb,).*') | first }}"
     configDIT_dn: "{{ result.stdout_lines | select('match','^dn: .*(config,).*') | first }}"
-    openldap_admin_config_password_hashed: "{{ openldap_admin_config_password_hashed.stdout }}"
+    normalDIT_dn: "{{ result.stdout_lines | select('match','^dn: .*(config,).*') | first }}"
+    install_admin_dn: "cn=admin,{{ install_domain_dc }}" 
+    admin_dn: "cn=admin,{{ new_openldap_domain_dc }}" 
+    openldap_admin_password_hashed: "{{ openldap_admin_password_hashed.stdout }}"
 
-- name:
-  debug:
-    msg: "{{ openldap_admin_password }} and {{ openldap_admin_config_password_hashed }}"
+# Change default settings. Keep the empty lines between the ldiff input blocks!
+- name: Change RootDN admin password, olcSuffix and olcRootDN
+  shell: |
+      docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -Y EXTERNAL <<EOF
+      {{ rootDN_dn }}
+      changetype: modify
+      replace: olcRootPW
+      olcRootPW: {{ openldap_admin_password_hashed }}
 
-# - name: Change RootDN admin password
-#   shell: |
-#       docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -Y EXTERNAL <<EOF
-#       {{ rootDN_dn }}
-#       changetype: modify
-#       replace: olcRootPW
-#       olcRootPW: {{ openldap_admin_config_password_hashed }}
-#       EOF
-#   become: true
-#   become_user: root #TODO fix docker user
+      {{ rootDN_dn }}
+      changetype: modify
+      replace: olcSuffix
+      olcSuffix: {{ new_openldap_domain_dc }}
 
-# - name: Change ConfigDIT admin password
-#   shell: |
-#       docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -Y EXTERNAL <<EOF
-#       {{ configDIT_dn }}
-#       changetype: modify
-#       replace: olcRootPW
-#       olcRootPW: {{ openldap_admin_config_password_hashed }}
-#       EOF
-#   become: true
-#   become_user: root #TODO fix docker user
+      {{ rootDN_dn }}
+      changetype: modify
+      replace: olcRootDN
+      olcRootDN: {{ admin_dn }}
+      EOF
+  become: true
+  become_user: root #TODO fix docker user
+
+- name: Change Config DIT admin password
+  shell: |
+      docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -Y EXTERNAL <<EOF
+      {{ configDIT_dn }}
+      changetype: modify
+      replace: olcRootPW
+      olcRootPW: {{ openldap_admin_password_hashed }}
+      EOF
+  become: true
+  become_user: root #TODO fix docker user
+
+# Change default settings. Keep the empty lines between the ldiff input blocks!
+- name: Change Normal DIT admin password
+  shell: |
+      docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldap://localhost -x -D {{ admin_dn }} -w {{ openldap_admin_password }} <<EOF
+      dn: {{ admin_dn }}
+      changetype: modify
+      replace: userPassword
+      userPassword: {{ openldap_admin_password_hashed }}
+      EOF
+  become: true
+  become_user: root #TODO fix docker user
+
+      # dn: {{ install_admin_dn }}
+      # changetype: modify
+      # replace: userPassword
+      # userPassword: {{ openldap_admin_password_hashed }}
+
+
 
 - name: Get path to config volume for openldap container 
   docker_volume_info:
