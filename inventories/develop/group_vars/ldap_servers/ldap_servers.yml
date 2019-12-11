@@ -22,5 +22,4 @@ recreate_openldap_container: "{{'yes' if recreate_openldap_container_input | low
 recreate_openldap_volumes: "{{'always' if recreate_openldap_volumes_input | lower is match('y|yes') else 'never'}}"
 
 # OpenLDAP settings for general setup
-openldap_admin_password: "{{ openldap_admin_pass_input }}"
-openldap_dc_string: "dc=nnworks, dc=nl" 
+openldap_backend_db: "mdb"

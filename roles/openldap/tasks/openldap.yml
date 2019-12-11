@@ -55,10 +55,10 @@
     recreate: "{{ recreate_openldap_container }}"
     memory: "{{ openldap_max_memory }}"
     env:
-      LDAP_ORGANISATION: "{{ install_organisation }}"
-      LDAP_DOMAIN: "{{ install_domain }}"
-      LDAP_BASE_DN: "{{ install_base_dn }}"
-      LDAP_BACKEND: "{{ install_backend_db }}"
+      LDAP_ORGANISATION: "{{ openldap_organization_name_input }}"
+      LDAP_DOMAIN: "{{ openldap_domain_input }}"
+      LDAP_BASE_DN: "{{ openldap_domain_input }}"
+      LDAP_BACKEND: "{{ openldap_backend_db }}"
       #LDAP_TLS: "true"
       #LDAP_TLS_CRT_FILENAME: "mycrt.crt"
       #LDAP_TLS_KEY_FILENAME: "{{ openldap_config_volume_name }}mycrt.priv.key"
@@ -92,8 +92,7 @@
   retries: 10
 
 - set_fact:
-    install_domain_dc: "dc={{ install_domain.split('.') | join(',dc=') }}"
-    new_openldap_domain_dc: "dc={{ openldap_domain_input.split('.') | join(',dc=') }}"
+    install_domain_dc: "dc={{ openldap_domain_input.split('.') | join(',dc=') }}"
 
 - name: "Wait for OpenLDAP ldapi:// to be present"
   shell: "docker exec openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b cn=admin,{{ install_domain_dc }}"
@@ -128,8 +127,7 @@
     rootDN_dn: "{{ result.stdout_lines | select('match','^dn: .*(mdb,).*') | first }}"
     configDIT_dn: "{{ result.stdout_lines | select('match','^dn: .*(config,).*') | first }}"
     normalDIT_dn: "{{ result.stdout_lines | select('match','^dn: .*(config,).*') | first }}"
-    install_admin_dn: "cn=admin,{{ install_domain_dc }}" 
-    admin_dn: "cn=admin,{{ new_openldap_domain_dc }}" 
+    admin_dn: "cn=admin,{{ install_domain_dc }}" 
     openldap_admin_password_hashed: "{{ openldap_admin_password_hashed.stdout }}"
 
 # Change default settings. Keep the empty lines between the ldiff input blocks!
@@ -140,16 +138,6 @@
       changetype: modify
       replace: olcRootPW
       olcRootPW: {{ openldap_admin_password_hashed }}
-
-      {{ rootDN_dn }}
-      changetype: modify
-      replace: olcSuffix
-      olcSuffix: {{ new_openldap_domain_dc }}
-
-      {{ rootDN_dn }}
-      changetype: modify
-      replace: olcRootDN
-      olcRootDN: {{ admin_dn }}
       EOF
   become: true
   become_user: root #TODO fix docker user
@@ -177,12 +165,6 @@
   become: true
   become_user: root #TODO fix docker user
 
-      # dn: {{ install_admin_dn }}
-      # changetype: modify
-      # replace: userPassword
-      # userPassword: {{ openldap_admin_password_hashed }}
-
-
 
 - name: Get path to config volume for openldap container 
   docker_volume_info:
@@ -195,6 +177,19 @@
     path: "{{ config_volume_patch }}/custom-config/"
   vars:
     config_volume_patch: "{{ config_volume_data.volume.Mountpoint }}"
+
+# - name: Copy private key, custom certificates and dhparam.pem to custom config directory
+#   copy:
+#       dest: "{{ config_volume_patch }}/custom-config/"
+#       src: undefined # not required. Local path to a file to copy to the remote server; can be absolute or relative. If path is a directory, it is copied recursively. In this case, if path ends with "/", only inside contents of that directory are copied to destination. Otherwise, if it does not end with "/", the directory itself with all contents is copied. This behavior is similar to Rsync.
+#       force: yes
+#       group: undefined # not required. Name of the group that should own the file/directory, as would be fed to I(chown).
+#       mode: undefined # not required. Mode the file or directory should be. For those used to I(/usr/bin/chmod) remember that modes are actually octal numbers. You must either add a leading zero so that Ansible's YAML parser knows it is an octal number (like C(0644) or C(01777)) or quote it (like C('644') or C('1777')) so Ansible receives a string and can do its own conversion from string into number.  Giving Ansible a number without following one of these rules will end up with a decimal number which will have unexpected results.  As of version 1.8, the mode may be specified as a symbolic mode (for example, C(u+rwx) or C(u=rw,g=r,o=r)).  As of version 2.3, the mode may also be the special string C(preserve).  C(preserve) means that the file will be given the same permissions as the source file.
+#       owner: undefined # not required. Name of the user that should own the file/directory, as would be fed to I(chown).
+
+
+
+
 
 - name: "Restart docker container {{ openldap_docker_container_name }}"
   docker_container:
