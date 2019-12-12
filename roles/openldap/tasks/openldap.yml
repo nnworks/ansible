@@ -54,6 +54,8 @@
     state: started
     recreate: "{{ recreate_openldap_container }}"
     memory: "{{ openldap_max_memory }}"
+    privileged: false
+    user: root
     env:
       LDAP_ORGANISATION: "{{ openldap_organization_name_input }}"
       LDAP_DOMAIN: "{{ openldap_domain_input }}"
@@ -77,7 +79,6 @@
     hostname: "{{ openldap_docker_container_hostname }}"
     exposed_ports: "{{ openldap_docker_container_exposes_ports }}"
     published_ports: "{{ openldap_docker_container_publish_ports }}"
-    user: "root" # should be changed
     restart_policy: always
   register: openldap_inspect_data
 
@@ -97,7 +98,7 @@
 - name: "Wait for OpenLDAP ldapi:// to be present"
   shell: "docker exec openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b cn=admin,{{ install_domain_dc }}"
   become: true
-  become_user: root #TODO fix docker user
+  become_user: root
   register: ldapi_responding
   until: ldapi_responding is success
   retries: 10
@@ -120,7 +121,7 @@
   shell: |
       docker exec --interactive {{ openldap_docker_container_name }} ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" dn olcRootDN olcRootPW
   become: true
-  become_user: root #TODO fix docker user
+  become_user: root
   register: result
 
 - set_fact:
@@ -140,7 +141,7 @@
       olcRootPW: {{ openldap_admin_password_hashed }}
       EOF
   become: true
-  become_user: root #TODO fix docker user
+  become_user: root
 
 - name: Change Config DIT admin password
   shell: |
@@ -151,7 +152,7 @@
       olcRootPW: {{ openldap_admin_password_hashed }}
       EOF
   become: true
-  become_user: root #TODO fix docker user
+  become_user: root
 
 # Change default settings. Keep the empty lines between the ldiff input blocks!
 - name: Change Normal DIT admin password
@@ -163,7 +164,7 @@
       userPassword: {{ openldap_admin_password_hashed }}
       EOF
   become: true
-  become_user: root #TODO fix docker user
+  become_user: root
 
 
 - name: Get path to config volume for openldap container 
@@ -171,23 +172,23 @@
     name: "{{ openldap_config_volume_name }}"
   register: config_volume_data
 
-- name: "Create directory for custom config ldif filesystem ({{ config_volume_patch }}/custom-config/)"
+- name: "Create directory for custom config ldif filesystem ({{ config_volume_data.volume.Mountpoint }}/custom-config/)"
   file:
     state: directory
-    path: "{{ config_volume_patch }}/custom-config/"
-  vars:
-    config_volume_patch: "{{ config_volume_data.volume.Mountpoint }}"
+    path: "{{ config_volume_data.volume.Mountpoint }}/custom-config/"
 
-# - name: Copy private key, custom certificates and dhparam.pem to custom config directory
-#   copy:
-#       dest: "{{ config_volume_patch }}/custom-config/"
-#       src: undefined # not required. Local path to a file to copy to the remote server; can be absolute or relative. If path is a directory, it is copied recursively. In this case, if path ends with "/", only inside contents of that directory are copied to destination. Otherwise, if it does not end with "/", the directory itself with all contents is copied. This behavior is similar to Rsync.
-#       force: yes
-#       group: undefined # not required. Name of the group that should own the file/directory, as would be fed to I(chown).
-#       mode: undefined # not required. Mode the file or directory should be. For those used to I(/usr/bin/chmod) remember that modes are actually octal numbers. You must either add a leading zero so that Ansible's YAML parser knows it is an octal number (like C(0644) or C(01777)) or quote it (like C('644') or C('1777')) so Ansible receives a string and can do its own conversion from string into number.  Giving Ansible a number without following one of these rules will end up with a decimal number which will have unexpected results.  As of version 1.8, the mode may be specified as a symbolic mode (for example, C(u+rwx) or C(u=rw,g=r,o=r)).  As of version 2.3, the mode may also be the special string C(preserve).  C(preserve) means that the file will be given the same permissions as the source file.
-#       owner: undefined # not required. Name of the user that should own the file/directory, as would be fed to I(chown).
-
-
+- name: Copy private key, custom certificates and dhparam.pem to custom config directory
+  copy:
+    dest: "{{ config_volume_data.volume.Mountpoint }}/custom-config/"
+    src: "{{ item }}"
+    force: yes
+    mode: '0400'
+  become: true
+  become_user: root
+  loop:
+    - "{{ certs_dir }}/{{ internal_certs_cert_file }}"
+    - "{{ internal_cert_priv_key_file }}"
+    
 
 
 
@@ -222,7 +223,7 @@
 #    hashed_password: "{{ hashed_password }}"
 #    suffix: "{{ openldap_dc_string }}"
 #    rootDN: "cn=admin, {{ openldap_dc_string }}"
-#    file_path: "{{ config_volume_patch }}/custom-config/administrator-settings.ldif"
+#    file_path: "{{ config_volume_path }}/custom-config/administrator-settings.ldif"
 #  loop:
 
 #- name: copy ldif to 

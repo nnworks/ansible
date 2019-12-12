@@ -1,6 +1,6 @@
 - openldap config, store password into secrets file
 
-- cleanup mess with openldap settings. in exposedblabla configs
+- upload crt and priv key
 - set crt and key and dhparam for openldap
 
 
