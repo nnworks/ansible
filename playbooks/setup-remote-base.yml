@@ -4,7 +4,7 @@
   - web_servers
     
   become: true
-  become_user: root
+  become_user: "root"
 
   vars:
     # ssh username / sudo password

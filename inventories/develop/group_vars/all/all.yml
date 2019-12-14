@@ -6,12 +6,19 @@ current_inventory_env: "{{ inventory_dir | basename }}"
 # resource directory
 resource_dir: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}"
 
-# CA / certificates to copy to host (if needed)
+# CA / certificates to copy to host (if needed) 
 cacerts_dir:  "{{ resource_dir }}/cacerts"
 certs_dir:  "{{ resource_dir }}/certs"
 ca_certs: "{{ query('fileglob', cacerts_dir + '/*.crt') }}"
+
+# name of internal CA and CA signed certificate (how it ends up in the resources/cacerts directory)
 internal_cacerts_ca_file: "internal-ca.crt"
 internal_certs_cert_file: "internal-cert.crt"
+
+# Paths of internal certificate (signed by above CA) and private/public key files. 
+# These are not present in resources dir (for security reasons is it only present in the ~/ansible user)
+internal_cert_priv_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key-priv.pem"
+internal_cert_pub_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key-pub.pem"
 
 # Current user is used for initial ssh connection.
 current_user: "{{ lookup('env','USER') }}"

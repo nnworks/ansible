@@ -54,11 +54,13 @@
     state: started
     recreate: "{{ recreate_openldap_container }}"
     memory: "{{ openldap_max_memory }}"
+    privileged: false
+    user: root
     env:
-      LDAP_ORGANISATION: "{{ install_organisation }}"
-      LDAP_DOMAIN: "{{ install_domain }}"
-      LDAP_BASE_DN: "{{ install_base_dn }}"
-      LDAP_BACKEND: "{{ install_backend_db }}"
+      LDAP_ORGANISATION: "{{ openldap_organization_name_input }}"
+      LDAP_DOMAIN: "{{ openldap_domain_input }}"
+      LDAP_BASE_DN: "{{ openldap_domain_input }}"
+      LDAP_BACKEND: "{{ openldap_backend_db }}"
       #LDAP_TLS: "true"
       #LDAP_TLS_CRT_FILENAME: "mycrt.crt"
       #LDAP_TLS_KEY_FILENAME: "{{ openldap_config_volume_name }}mycrt.priv.key"
@@ -77,7 +79,6 @@
     hostname: "{{ openldap_docker_container_hostname }}"
     exposed_ports: "{{ openldap_docker_container_exposes_ports }}"
     published_ports: "{{ openldap_docker_container_publish_ports }}"
-    user: "root" # should be changed
     restart_policy: always
   register: openldap_inspect_data
 
@@ -92,13 +93,12 @@
   retries: 10
 
 - set_fact:
-    install_domain_dc: "dc={{ install_domain.split('.') | join(',dc=') }}"
-    new_openldap_domain_dc: "dc={{ openldap_domain_input.split('.') | join(',dc=') }}"
+    install_domain_dc: "dc={{ openldap_domain_input.split('.') | join(',dc=') }}"
 
 - name: "Wait for OpenLDAP ldapi:// to be present"
   shell: "docker exec openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b cn=admin,{{ install_domain_dc }}"
   become: true
-  become_user: root #TODO fix docker user
+  become_user: root
   register: ldapi_responding
   until: ldapi_responding is success
   retries: 10
@@ -121,15 +121,14 @@
   shell: |
       docker exec --interactive {{ openldap_docker_container_name }} ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" dn olcRootDN olcRootPW
   become: true
-  become_user: root #TODO fix docker user
+  become_user: root
   register: result
 
 - set_fact:
     rootDN_dn: "{{ result.stdout_lines | select('match','^dn: .*(mdb,).*') | first }}"
     configDIT_dn: "{{ result.stdout_lines | select('match','^dn: .*(config,).*') | first }}"
     normalDIT_dn: "{{ result.stdout_lines | select('match','^dn: .*(config,).*') | first }}"
-    install_admin_dn: "cn=admin,{{ install_domain_dc }}" 
-    admin_dn: "cn=admin,{{ new_openldap_domain_dc }}" 
+    admin_dn: "cn=admin,{{ install_domain_dc }}" 
     openldap_admin_password_hashed: "{{ openldap_admin_password_hashed.stdout }}"
 
 # Change default settings. Keep the empty lines between the ldiff input blocks!
@@ -140,19 +139,9 @@
       changetype: modify
       replace: olcRootPW
       olcRootPW: {{ openldap_admin_password_hashed }}
-
-      {{ rootDN_dn }}
-      changetype: modify
-      replace: olcSuffix
-      olcSuffix: {{ new_openldap_domain_dc }}
-
-      {{ rootDN_dn }}
-      changetype: modify
-      replace: olcRootDN
-      olcRootDN: {{ admin_dn }}
       EOF
   become: true
-  become_user: root #TODO fix docker user
+  become_user: root
 
 - name: Change Config DIT admin password
   shell: |
@@ -163,7 +152,7 @@
       olcRootPW: {{ openldap_admin_password_hashed }}
       EOF
   become: true
-  become_user: root #TODO fix docker user
+  become_user: root
 
 # Change default settings. Keep the empty lines between the ldiff input blocks!
 - name: Change Normal DIT admin password
@@ -175,13 +164,7 @@
       userPassword: {{ openldap_admin_password_hashed }}
       EOF
   become: true
-  become_user: root #TODO fix docker user
-
-      # dn: {{ install_admin_dn }}
-      # changetype: modify
-      # replace: userPassword
-      # userPassword: {{ openldap_admin_password_hashed }}
-
+  become_user: root
 
 
 - name: Get path to config volume for openldap container 
@@ -189,12 +172,25 @@
     name: "{{ openldap_config_volume_name }}"
   register: config_volume_data
 
-- name: "Create directory for custom config ldif filesystem ({{ config_volume_patch }}/custom-config/)"
+- name: "Create directory for custom config ldif filesystem ({{ config_volume_data.volume.Mountpoint }}/custom-config/)"
   file:
     state: directory
-    path: "{{ config_volume_patch }}/custom-config/"
-  vars:
-    config_volume_patch: "{{ config_volume_data.volume.Mountpoint }}"
+    path: "{{ config_volume_data.volume.Mountpoint }}/custom-config/"
+
+- name: Copy private key, custom certificates and dhparam.pem to custom config directory
+  copy:
+    dest: "{{ config_volume_data.volume.Mountpoint }}/custom-config/"
+    src: "{{ item }}"
+    force: yes
+    mode: '0400'
+  become: true
+  become_user: root
+  loop:
+    - "{{ certs_dir }}/{{ internal_certs_cert_file }}"
+    - "{{ internal_cert_priv_key_file }}"
+    
+
+
 
 - name: "Restart docker container {{ openldap_docker_container_name }}"
   docker_container:
@@ -227,7 +223,7 @@
 #    hashed_password: "{{ hashed_password }}"
 #    suffix: "{{ openldap_dc_string }}"
 #    rootDN: "cn=admin, {{ openldap_dc_string }}"
-#    file_path: "{{ config_volume_patch }}/custom-config/administrator-settings.ldif"
+#    file_path: "{{ config_volume_path }}/custom-config/administrator-settings.ldif"
 #  loop:
 
 #- name: copy ldif to 

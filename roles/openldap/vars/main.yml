@@ -1,6 +1,2 @@
 ---
 
-install_organisation: "InitialCompany"
-install_domain: "initialdomain.nl"
-install_base_dn: "initialdomain.nl"
-install_backend_db: "mdb"

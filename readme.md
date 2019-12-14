@@ -157,6 +157,7 @@ or
 - Requests whether the container should be recreated. If 'no', no update is done.
 - Requests whether the postgres-data volume for persistant data should be recreated a.k.a. deleted and created again.
 
+
 # Help, it doesn't work
 
 ## **Hanging in the [Gathering Facts] task**
@@ -166,3 +167,6 @@ rm -rf ~/.ansible
 
 ## **error message like: no vault secrets found**
 When the create-vaults.yml is run and this message appears normally means that there is already a vault-ssh.yml and/or vault-secrets.yml present because the playbook already had ran already before. Remove the files manually to generate them again.
+
+## **pip3 installing modules gives a failure**
+Sometimes installing the passlib or cryptography modules fail (seg fault of pip3). What helped me was removing the `~/.local/lib/python3.x` directory. 

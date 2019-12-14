@@ -89,21 +89,17 @@
 
 - name: Create directory ssl directory for NginX
   file:
-    path: "{{ config_volume_patch }}/ssl"
+    path: "{{ config_volume_data.volume.Mountpoint }}/ssl"
     state: directory
     mode: u=rwx,g=,o=
-  vars:
-    config_volume_patch: "{{ config_volume_data.volume.Mountpoint }}"
 
 - name: "Copy SSL certificate and private key to {{ nginx_config_volume_container_mount_point }}/ssl, volume path: {{ config_volume_data.volume.Mountpoint }}"
   copy:
     src: "{{ item }}"
-    dest: "{{ config_volume_patch }}/ssl/{{ item | basename }}"
+    dest: "{{ config_volume_data.volume.Mountpoint }}/ssl/{{ item | basename }}"
     owner: 
     group: 
     mode: u=rw,g=,o=
-  vars:
-    config_volume_patch: "{{ config_volume_data.volume.Mountpoint }}"
   loop:
     - "{{ certs_dir }}/{{ internal_certs_cert_file }}"
     - "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key-priv.pem"

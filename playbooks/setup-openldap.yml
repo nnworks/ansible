@@ -25,13 +25,20 @@
       private: false
       unsafe: false
 
+    - name: openldap_organization_name_input
+      prompt: |-
+              Please give the OpenLDAP organization name
+      private: false
+      unsafe: true
+      confirm: false
+
     - name: openldap_admin_pass_input
       prompt: |-
               Please give a password for the OpenLDAP administrator
       private: true
       unsafe: true
       confirm: yes
-      default: ""
+      default: "admin"
 
   vars:
     # sudo to ansible user to copy public key into authorized_keys
