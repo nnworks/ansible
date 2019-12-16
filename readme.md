@@ -112,7 +112,9 @@ https://www.digitalocean.com/community/tutorials/how-to-change-account-passwords
 https://www.digitalocean.com/community/tutorials/how-to-manage-and-use-ldap-servers-with-openldap-utilities
 http://techiezone.rottigni.net/2011/12/change-root-dn-password-on-openldap/
 
+
 `sudo docker exec openldap ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config olcDatabase=\*`
+`sudo docker exec --interactive openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config"`
 
 Some LDAP basic info: 
 
@@ -132,7 +134,7 @@ Will return something like:
 dn
 namingContexts: dc=default,dc=nl
 ```
-Find an simpleSecurityObject (used for uname/password config) entry to bind with under the DIT looked up above (use -b to bind to a specific DIT dn)
+Find an simpleSecurityObject (used for uname/password config) entry to bind with under the DIT looked up above (use -b to bind to a specific DIT dn). Change the dc= parts to the domain parts given during the openLDAP container installation.
 
 `sudo docker exec openldap ldapsearch -H ldap://localhost -x -LLL -b "dc=default,dc=nl" "(objectClass=simpleSecurityObject)" dn`
 
@@ -140,13 +142,25 @@ Will return something like:
 ```
 dn: cn=admin,dc=default,dc=nl
 ```
-`sudo docker exec --interactive openldap ldapsearch -H ldap://localhost -x -D "cn=admin,dc=example,dc=com" -W`
+
+Performing actions using the SASL/EXTERNAL authentication method (only possible from within the container):
+
+`sudo docker exec openldap ldapsearch -Y EXTERNAL -H ldapi:///`
+
+Authentication on openLDAP with username (dn) and password:
+
+`sudo docker exec --interactive openldap ldapsearch -H ldap://localhost -x -D "cn=admin,dc=default,dc=nl" -W`
     
 or
 
 `sudo docker exec openldap ldapsearch -H ldap://localhost -x -D "cn=admin,dc=default,dc=nl" -w 1234`
 
 
+Querying the current TLS certificate / key etc:
+`sudo docker exec --interactive openldap ldapsearch -H ldapi:// -Y EXTERNAL -b cn=config '(|(olcTLSCertificateFile=*)(olcTLSCertificateKeyFile=*)(olcTLSCipherSuite=*))' olcTLSCertificateFile olcTLSCertificateKeyFile olcTLSCipherSuite olcTLSProtocolMin`
+
+Modifying openLDAP settings in the Config DIT:
+TODO
 
 
 ## 3) Remote installation of a PostgreSQL database.
