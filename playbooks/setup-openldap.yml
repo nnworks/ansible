@@ -9,7 +9,8 @@
               Should the OpenLDAP container be recreated if it is already there (y/n)?
       private: false
       unsafe: true
-      default: "n"
+      #default: "n"
+      default: "y"
 
     - name: recreate_openldap_volumes_input
       prompt: |-
@@ -17,13 +18,15 @@
       private: false
       unsafe: true
       confirm: yes
-      default: "n"
+      #default: "n"
+      default: "y"
 
     - name: openldap_domain_input
       prompt: |-
               Please give the domain name for the OpenLDAP server
       private: false
       unsafe: false
+      default: example.com
 
     - name: openldap_organization_name_input
       prompt: |-
@@ -31,6 +34,7 @@
       private: false
       unsafe: true
       confirm: false
+      default: Example Corp      
 
     - name: openldap_admin_pass_input
       prompt: |-

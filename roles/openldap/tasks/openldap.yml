@@ -61,11 +61,11 @@
       LDAP_DOMAIN: "{{ openldap_domain_input }}"
       LDAP_BASE_DN: "{{ openldap_domain_input }}"
       LDAP_BACKEND: "{{ openldap_backend_db }}"
-      #LDAP_TLS: "true"
+      LDAP_TLS: "false"
+      #LDAP_TLS_CA_CRT_FILENAME: "myca.crt"
       #LDAP_TLS_CRT_FILENAME: "mycrt.crt"
       #LDAP_TLS_KEY_FILENAME: "{{ openldap_config_volume_name }}mycrt.priv.key"
       #LDAP_TLS_DH_PARAM_FILENAME: "my-dhparam.pem"
-      #LDAP_TLS_CA_CRT_FILENAME: "myca.crt"
       #LDAP_TLS_ENFORCE: "true"
       #LDAP_TLS_CIPHER_SUITE: "SECURE256:+SECURE128:-VERS-TLS-ALL:+VERS-TLS1.2:-RSA:-DHE-DSS:-CAMELLIA-128-CBC:-CAMELLIA-256-CBC"
       #LDAP_TLS_VERIFY_CLIENT: "demand"
@@ -82,8 +82,20 @@
     restart_policy: always
   register: openldap_inspect_data
 
+- name: Get path to config volume for openldap container 
+  docker_volume_info:
+    name: "{{ openldap_config_volume_name }}"
+  register: config_volume_data
+
 - set_fact:
+    # ip of openldap container
     openldap_ip: "{{ openldap_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
+    # path to custom configuration directory on host
+    custom_config_path_host: "{{ config_volume_data.volume.Mountpoint }}/custom-config"
+    # path to custom configuration directory in container
+    custom_config_path_container: "{{ openldap_config_volume_container_mount_point }}/custom-config"
+    
+    install_domain_dc: "dc={{ openldap_domain_input.split('.') | join(',dc=') }}"
 
 - name: Wait for OpenLDAP container to be fully started
   docker_container_info:
@@ -91,9 +103,6 @@
   register: result
   until: result.container.State.Status == 'running'
   retries: 10
-
-- set_fact:
-    install_domain_dc: "dc={{ openldap_domain_input.split('.') | join(',dc=') }}"
 
 - name: "Wait for OpenLDAP ldapi:// to be present"
   shell: "docker exec openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b cn=admin,{{ install_domain_dc }}"
@@ -167,36 +176,84 @@
   become_user: root
 
 
-- name: Get path to config volume for openldap container 
-  docker_volume_info:
-    name: "{{ openldap_config_volume_name }}"
-  register: config_volume_data
-
-- name: "Create directory for custom config ldif filesystem ({{ config_volume_data.volume.Mountpoint }}/custom-config/)"
+- name: "Create directory for custom config ldif filesystem ({{ custom_config_path_host }})"
   file:
     state: directory
-    path: "{{ config_volume_data.volume.Mountpoint }}/custom-config/"
+    path: "{{ custom_config_path_host }}"
 
-- name: Copy private key, custom certificates and dhparam.pem to custom config directory
+- name: Copy private key, custom certificates and dhparam.pem to custom config directory on host
   copy:
-    dest: "{{ config_volume_data.volume.Mountpoint }}/custom-config/"
+    dest: "{{ custom_config_path_host }}"
     src: "{{ item }}"
     force: yes
     mode: '0400'
   become: true
   become_user: root
   loop:
+    - "{{ cacerts_dir }}/{{ internal_cacerts_ca_file }}"
     - "{{ certs_dir }}/{{ internal_certs_cert_file }}"
     - "{{ internal_cert_priv_key_file }}"
-    
+
+- name: change owner of cutom-config directory, private key, certificate and dhparams to openldap
+  shell: "docker container exec {{ openldap_docker_container_name }} chown openldap:openldap {{ item }}"
+  loop:
+    - "{{ custom_config_path_container }}"
+    - "{{ custom_config_path_container }}/{{ internal_cacerts_ca_file }}"
+    - "{{ custom_config_path_container }}/{{ internal_certs_cert_file }}"
+    - "{{ custom_config_path_container }}/{{ internal_cert_priv_key_file | basename }}"
+
+
+- name: debugging
+  debug:
+    msg: |
+      docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -Y EXTERNAL <<EOF
+      dn: cn=config
+      changetype: modify
+      replace: olcTLSCertificateKeyFile
+      olcTLSCertificateKeyFile: "{{ custom_config_path_container }}/{{ internal_cert_priv_key_file | basename }}"
+
+      dn: cn=config
+      changetype: modify
+      replace: olcTLSCertificateFile
+      olcTLSCertificateFile: "{{ custom_config_path_container }}/{{ internal_certs_cert_file }}"
+      EOF
+
+# configure TLS. Keep the empty lines between the ldiff input blocks! And first change the key, then the cert, else error 80 may occur!
+# - name: Configure TLS
+#   shell: |
+#     docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -Y EXTERNAL <<EOF
+
+#     dn: cn=config
+#     changetype: modify
+#     replace: olcTLSCertificateFile
+#     olcTLSCertificateFile: "/etc/ldap/slapd.d/custom-config/internal-cert.crt"
+
+#     dn: cn=config
+#     changetype: modify
+#     replace: olcTLSCertificateKeyFile
+#     olcTLSCertificateKeyFile: "/etc/ldap/slapd.d/custom-config/develop-int-cert-key-priv.pem"
+#     EOF
+#       # dn: cn=config
+#       # changetype: modify
+#       # replace: olcTLSCertificateFile
+#       # olcTLSCertificateFile: {{ custom_config_path_container }}/{{ internal_certs_cert_file }}
+
+#       # dn: cn=config
+#       # changetype: modify
+#       # replace: olcTLSCertificateKeyFile
+#       # olcTLSCertificateKeyFile: {{ custom_config_path_container }}/{{ internal_cert_priv_key_file | basename }}
+#       # EOF
+#   become: true
+#   become_user: root
 
 
 
-- name: "Restart docker container {{ openldap_docker_container_name }}"
-  docker_container:
-    name: "{{ openldap_docker_container_name }}"
-    state: started
-    restart: true
+
+# - name: "Restart docker container {{ openldap_docker_container_name }}"
+#   docker_container:
+#     name: "{{ openldap_docker_container_name }}"
+#     state: started
+#     restart: true
 
 
 # - name: Set up an administrator user
