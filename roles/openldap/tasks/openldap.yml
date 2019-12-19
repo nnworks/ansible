@@ -61,11 +61,11 @@
       LDAP_DOMAIN: "{{ openldap_domain_input }}"
       LDAP_BASE_DN: "{{ openldap_domain_input }}"
       LDAP_BACKEND: "{{ openldap_backend_db }}"
-      #LDAP_TLS: "true"
+      LDAP_TLS: "false"
+      #LDAP_TLS_CA_CRT_FILENAME: "myca.crt"
       #LDAP_TLS_CRT_FILENAME: "mycrt.crt"
       #LDAP_TLS_KEY_FILENAME: "{{ openldap_config_volume_name }}mycrt.priv.key"
       #LDAP_TLS_DH_PARAM_FILENAME: "my-dhparam.pem"
-      #LDAP_TLS_CA_CRT_FILENAME: "myca.crt"
       #LDAP_TLS_ENFORCE: "true"
       #LDAP_TLS_CIPHER_SUITE: "SECURE256:+SECURE128:-VERS-TLS-ALL:+VERS-TLS1.2:-RSA:-DHE-DSS:-CAMELLIA-128-CBC:-CAMELLIA-256-CBC"
       #LDAP_TLS_VERIFY_CLIENT: "demand"
@@ -190,14 +190,18 @@
   become: true
   become_user: root
   loop:
+    - "{{ cacerts_dir }}/{{ internal_cacerts_ca_file }}"
     - "{{ certs_dir }}/{{ internal_certs_cert_file }}"
     - "{{ internal_cert_priv_key_file }}"
 
-- name: change owner of private key, certificate and dhparams to openldap
+- name: change owner of cutom-config directory, private key, certificate and dhparams to openldap
   shell: "docker container exec {{ openldap_docker_container_name }} chown openldap:openldap {{ item }}"
   loop:
+    - "{{ custom_config_path_container }}"
+    - "{{ custom_config_path_container }}/{{ internal_cacerts_ca_file }}"
     - "{{ custom_config_path_container }}/{{ internal_certs_cert_file }}"
     - "{{ custom_config_path_container }}/{{ internal_cert_priv_key_file | basename }}"
+
 
 - name: debugging
   debug:
