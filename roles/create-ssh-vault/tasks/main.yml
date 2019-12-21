@@ -11,7 +11,9 @@
 # Vars needed: 
 # - ssh_vault_location : where do we need to put the vault
 # - vault_id: id of the vault, for password identification
+# For the template:
 # - vault_ssh_priv
 # - vault_ssh_pub
-- import_tasks: create-ssh-vault.yml  
+# - vault_dhparam
+- import_tasks: create-ssh-vault.yml
   

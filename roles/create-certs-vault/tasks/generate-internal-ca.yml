@@ -1,8 +1,8 @@
 ---
 
-- name: Create directory for ca stuff
+- name: Create directory for ca stuff (if not already there)
   file:
-    path: "{{ ca_stuff_location }}"
+    path: "{{ certs_stuff_location }}"
     state: directory
     mode: u=rwx,g=,o=
 
@@ -17,12 +17,13 @@
     csr_file: "{{ internal_ca_csr }}"
     csr_config: "{{ internal_ca_config }}"
 
-- import_tasks: ../../common/tasks/create-cert.yml
+- import_tasks: ../../common/tasks/create-cert-from-csr.yml
   vars:
     priv_key_file: "{{ internal_ca_priv_key_file }}"
     csr_file: "{{ internal_ca_csr }}"
     cert_file: "{{ internal_ca_cert }}"
-    days: "{{ internal_ca_days }}"
+    ca_cert_priv_key_file: "{{ internal_ca_priv_key_file }}"
+    openssl_ca_config_file: "{{ openssl_ca_config }}"
 
 - name: Store keys in variables  
   set_fact:

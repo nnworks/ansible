@@ -1,8 +1,25 @@
 ---
 
-# Generate keypair and store it in facts / vars: vault_ssh_priv, vault_ssh_pub
+- name: Create serial.txt and index.txt for openssl ca book-keeping
+  template:
+    src: "templates/{{ item }}.j2"
+    dest: "{{ openssl_ca_config | dirname }}/{{ item }}"
+    mode: '0600'
+  loop:
+    - index.txt
+    - serial.txt
+
+# Generate keypair and CA certificate
 - import_tasks: generate-internal-ca.yml  
+
+# Generate internal certificate signed by the internal CA 
 - import_tasks: generate-internal-cert.yml  
 
+# Create a Diffie Hellman param set
+# Vars needed:
+# - dhparam_location
+- import_tasks: create-dhparam.yml
+
+# Create the vault containing the certs, keys and dhparams
 - import_tasks: create-certs-keys-vault.yml  
   

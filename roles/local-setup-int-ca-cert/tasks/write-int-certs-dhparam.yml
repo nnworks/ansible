@@ -33,3 +33,21 @@
     mode: u=rw,g=,o=
   vars: 
     cert_data: "{{ int_cert }}"
+
+- name: Create directory in resource tree for dhparam files
+  file:
+    path: "{{ dhparams_dir }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: Write dhparam.pem to resources directory
+  template:
+    src: templates/dhparam-template.j2
+    dest: "{{ dhparams_dir }}/{{ dhparam_file }}"
+    owner: "{{ current_user }}"
+    lstrip_blocks: true
+    trim_blocks: false
+    mode: u=rw,g=,o=
+  vars: 
+    dhparam_data: "{{ dhparam }}"
+

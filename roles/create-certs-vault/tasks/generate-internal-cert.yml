@@ -17,14 +17,14 @@
     csr_file: "{{ internal_cert_csr }}"
     csr_config: "{{ internal_cert_config }}"
 
-- import_tasks: ../../common/tasks/create-cert.yml
+- import_tasks: ../../common/tasks/create-cert-from-csr.yml
   vars:
     priv_key_file: "{{ internal_cert_priv_key_file }}"
     csr_file: "{{ internal_cert_csr }}"
     cert_file: "{{ internal_cert_cert }}"
-    days: "{{ internal_cert_days }}"
     ca_cert_file: "{{ internal_ca_cert }}"
     ca_cert_priv_key_file: "{{ internal_ca_priv_key_file }}"
+    openssl_ca_config_file: "{{ openssl_ca_config }}"
 
 - name: Store keys in variables  
   set_fact:

@@ -20,9 +20,8 @@ deployment_user_pass: "{{ lookup('password', '/tmp/passwordfile chars=ascii_lett
 
 # CA certificate settings
 internal_ca_config: "{{ resource_dir }}/csr-configs/internal-ca.conf"
-internal_ca_days: 1825
 internal_cert_config: "{{ resource_dir }}/csr-configs/internal-cert.conf"
-internal_cert_days: 1825
+openssl_ca_config: "{{ resource_dir }}/ca-config/openssl-ca.cnf"
 
 # name used when the ca certificate is extracted from vault to cacerts in resources
 certkeys_vault_location: "{{ inventory_dir}}/group_vars/local/vault-ca-certs.yml"

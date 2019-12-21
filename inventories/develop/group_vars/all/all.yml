@@ -9,11 +9,13 @@ resource_dir: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}"
 # CA / certificates to copy to host (if needed) 
 cacerts_dir:  "{{ resource_dir }}/cacerts"
 certs_dir:  "{{ resource_dir }}/certs"
+dhparams_dir:  "{{ resource_dir }}/dhparams"
 ca_certs: "{{ query('fileglob', cacerts_dir + '/*.crt') }}"
 
 # name of internal CA and CA signed certificate (how it ends up in the resources/cacerts directory)
 internal_cacerts_ca_file: "internal-ca.crt"
 internal_certs_cert_file: "internal-cert.crt"
+dhparam_file: "dhparam.pem"
 
 # Paths of internal certificate (signed by above CA) and private/public key files. 
 # These are not present in resources dir (for security reasons is it only present in the ~/ansible user)
@@ -33,13 +35,13 @@ deployment_user_groups: sudo
 ssh_user: "{{ current_user }}"
 
 # keypair settings (key will only be here during setup of authentication for host)
-ssh_keypair_location: "{{ current_user_home }}/ansible/keypairs/{{ current_inventory_env }}"
+ssh_keypair_location: "{{ current_user_home }}/ansible/ssl/keypairs/{{ current_inventory_env }}"
 
 # ca keypair and certificates
-ca_stuff_location: "{{ current_user_home }}/ansible/certs/{{ current_inventory_env }}/ca-stuff"
+certs_stuff_location: "{{ current_user_home }}/ansible/ssl/certs/{{ current_inventory_env }}"
 
 # ca keypair and certificates
-certs_stuff_location: "{{ current_user_home }}/ansible/certs/{{ current_inventory_env }}/certs-stuff"
+dhparam_location: "{{ current_user_home }}/ansible/ssl/dhparam/{{ current_inventory_env }}"
 
 # private key location for key authentication ()
 ssh_key_file_from_vault: "{{ ssh_keypair_location }}/ssh-key-from-vault"

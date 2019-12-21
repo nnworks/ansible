@@ -1,0 +1,17 @@
+---
+
+- name: Create directory for keypair
+  file:
+    path: "{{ dhparam_location }}"
+    state: directory
+    mode: u=rwx,g=,o=
+
+- name: Generate Diffie-Hellman parameters with the default size (4096 bits)
+  openssl_dhparam:
+    size: 4096
+    state: present
+    path: "{{ dhparam_location }}/{{ dhparam_file }}"
+
+- name: Store keys in variables  
+  set_fact:
+    vault_dhparam: "{{ lookup('file',  '{{ dhparam_location }}/{{ dhparam_file }}') }}"

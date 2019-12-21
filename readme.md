@@ -45,6 +45,15 @@ or
      `brew install sshpass`
  
 
+**openssl**
+
+On OSX the default (outdated) openssl/libressl is very slow in generating dhparams. 
+As an alternative you can install a more recent version with homebrew:
+
+`brew install openssl`
+
+`brew link openssl --force`
+
 ## **Remote host:**
 
 **sshd**
@@ -61,6 +70,7 @@ proxy_settings:
 
 ## CA certificates
 If other than standard CA certificates need to be installed on the remote hosts, put them (in crt format with extention .crt) in the **resources/[develop|...|production]/cacerts** directory.
+
 
 # Playbooks
 
@@ -106,7 +116,10 @@ After this step, you can login as ansible (or another user specified as 'deploym
 
 
 ## 3) Remote installation of an OpenLDAP service
-For more info see :
+Image used:
+https://github.com/osixia/docker-openldap
+
+For more about LDAP info see :
 https://www.golinuxcloud.com/install-and-configure-openldap-centos-7-linux/
 https://www.digitalocean.com/community/tutorials/how-to-change-account-passwords-on-an-openldap-server
 https://www.digitalocean.com/community/tutorials/how-to-manage-and-use-ldap-servers-with-openldap-utilities

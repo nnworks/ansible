@@ -10,17 +10,18 @@
     msg: "{{ certkeys_vault_location }} already exists, this one will be used."
   when: certkeys_vault_stat.stat.exists == true
 
-- name: Create vault yaml with keys
+- name: "Create {{ certkeys_vault_location | basename }} with keys, certificates and dhparams"
   template:
     src: templates/certs-keys-vault-template.j2
     dest: "{{ certkeys_vault_location }}"
     owner: "{{ current_user }}"
     mode: u=rw,g=,o=
-  when: certkeys_vault_stat.stat.exists == false
+  when: certkeys_vault_stat.stat.exists == false or
+        recreate_vaults_input == 'y'
 
-- name: Encrypt vault.yml containing the keypairs for the certificates
+- name: "Encrypt {{ certkeys_vault_location | basename }} containing the keypairs, certificates and dhparams"
   shell: ansible-vault encrypt "{{ certkeys_vault_location }}" --vault-id "{{ certkeys_vault_id }}@prompt"
-  when: certkeys_vault_stat.stat.exists == false
-  
+  when: certkeys_vault_stat.stat.exists == false or
+        recreate_vaults_input == 'y'
 
   

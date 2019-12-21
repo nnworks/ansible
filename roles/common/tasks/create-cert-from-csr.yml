@@ -1,0 +1,70 @@
+---
+
+# needs vars:
+#   priv_key_file
+#   csr_file
+#   cert_file
+#   days
+# for non-self signed certificate:
+#   ca_cert_file
+#   ca_cert_priv_key_file
+#   openssl_ca_config_file
+
+
+# - name: Generate certificate request (self-signed)
+#   shell: 
+#     cmd: >
+#       openssl x509
+#       -req
+#       -days {{ days }}
+#       -in {{ csr_file }}
+#       -signkey {{ priv_key_file }}
+#       -out {{ cert_file }}
+#       -sha512
+#     creates: "{{ cert_file }}"
+#   when: ca_cert_file is undefined or ca_cert_priv_key_file is undefined
+
+- name: Generate certificate from request (self-signed)
+  shell: 
+    cmd: >
+      openssl ca
+      -batch
+      -selfsign
+      -keyfile {{ ca_cert_priv_key_file }}
+      -in {{ csr_file }}
+      -outdir {{ cert_file | dirname }} 
+      -out {{ cert_file }}
+      -policy policy_anything
+      -config {{ openssl_ca_config_file }}
+    chdir: "{{ openssl_ca_config_file | dirname }}"
+    creates: "{{ cert_file }}"
+  when: ca_cert_file is undefined or ca_cert_priv_key_file is undefined
+
+- name: Generate certificate from request (signed by provided CA)
+  shell:
+    cmd: >
+      openssl ca
+      -batch
+      -cert {{ ca_cert_file }}
+      -keyfile {{ ca_cert_priv_key_file }}
+      -in {{ csr_file }}
+      -outdir {{ cert_file | dirname }} 
+      -out {{ cert_file }}
+      -policy policy_anything
+      -config {{ openssl_ca_config_file }}
+    chdir: "{{ openssl_ca_config_file | dirname }}"
+    creates: "{{ cert_file }}"
+  when: ca_cert_file is defined and ca_cert_priv_key_file is defined
+
+
+# - name: Generate certificate request (signed by provided CA)
+#   shell: 
+#     cmd: "openssl x509 -req -days {{ days }} -in {{ csr_file }} -signkey {{ priv_key_file }} -out {{ cert_file }} -sha512 -CA {{ ca_cert_file }} -CAkey {{ ca_cert_priv_key_file }} -CAcreateserial"
+#     creates: "{{ cert_file }}"
+#   when: ca_cert_file is defined and ca_cert_priv_key_file is defined
+
+- name: Change file permissions
+  file:
+    path: "{{ cert_file }}"
+    mode: u=rw,g=,o=
+  

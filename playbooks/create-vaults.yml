@@ -9,15 +9,23 @@
 
   vars:
     # Internal CA certificate settings
-    internal_ca_priv_key_file: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-key-priv.pem"
-    internal_ca_pub_key_file: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-key-pub.pem"
-    internal_ca_cert: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-cert.crt"
-    internal_ca_csr: "{{ ca_stuff_location }}/{{ current_inventory_env }}-int-ca-cert.csr"
+    internal_ca_priv_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-ca-key-priv.pem"
+    internal_ca_pub_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-ca-key-pub.pem"
+    internal_ca_cert: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-ca-cert.crt"
+    internal_ca_csr: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-ca-cert.csr"
 
     # Internal certificate request (for internal certificate to b esigned by internal CA)
     internal_cert_csr: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert.csr"
     internal_cert_cert: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert.crt"
-  
+
+  vars_prompt:
+    - name: recreate_vaults_input
+      prompt: |-
+              Should the vaults be recreated? (y/n)?
+      private: false
+      unsafe: true
+      default: "n"
+
   roles:
     - create-secrets-vault
     - create-ssh-vault
