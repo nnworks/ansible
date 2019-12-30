@@ -1,0 +1,1 @@
+This directory will contain certificates (like the internal CA signed certificate)
