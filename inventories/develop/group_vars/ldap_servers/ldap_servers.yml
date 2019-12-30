@@ -6,7 +6,7 @@ openldap_docker_image_tag: latest
 
 # OpenLDAP container settings
 openldap_docker_container_name: openldap
-openldap_docker_container_hostname: openldap-server.dev.internal.nnworks.nl
+openldap_docker_container_hostname: openldap-server.develop.internal.nnworks.nl
 openldap_docker_container_exposes_ports: ["389", "636"]
 openldap_docker_container_publish_ports: ["389:389", "636:636"]
 openldap_max_memory: null

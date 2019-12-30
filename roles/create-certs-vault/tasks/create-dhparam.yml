@@ -6,7 +6,7 @@
     state: directory
     mode: u=rwx,g=,o=
 
-- name: Generate Diffie-Hellman parameters with the default size (4096 bits)
+- name: Generate Diffie-Hellman parameters with the default size (4096 bits). This may take quite some time, depending on your machine specs.
   openssl_dhparam:
     size: 4096
     state: present
