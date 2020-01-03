@@ -1,13 +1,5 @@
-- openldap config, store password into secrets file
-
-- upload crt and priv key
-- set crt and key and dhparam for openldap
-
-
 - docker postgresql is installed, but security needs attention, with pg_hba module, ssl with internal certificate?
 - docker nginx on internal machine with internal certificate
 - docker nginx on external machine with LetsEncrypt certifcate
 - docker wordpress install
-
-
 

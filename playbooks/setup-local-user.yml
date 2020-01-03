@@ -11,7 +11,7 @@
   vars_prompt:
     - name: sudo_pass 
       prompt: |-
-              Sudo pass for user [{{ lookup('env', 'USER') }}] will be used to install some packages
+              Sudo pass (local) for user {{ lookup('env', 'USER') }} (will be used to install some packages)
       private: true
       unsafe: true    
 

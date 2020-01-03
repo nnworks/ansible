@@ -11,11 +11,7 @@ keypair_file: "ssh-key"
 cacert_vault_location: "{{ inventory_dir}}/group_vars/local/vault-cacert.yml"
 cacert_vault_id: "{{ current_inventory_env }}-cacert"
 
-# secrets vault location
-secrets_vault_location: "{{ inventory_dir}}/group_vars/all_servers/vault-secrets.yml"
-secrets_vault_id: "{{ current_inventory_env }}-secrets"
-
-# password for the ansible user (used for sudo lateron).
+# generate password for the ansible user (used for sudo lateron).
 deployment_user_pass: "{{ lookup('password', '/tmp/passwordfile chars=ascii_letters length=20') }}"
 
 # CA certificate settings

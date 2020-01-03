@@ -107,7 +107,7 @@
       LDAP_TLS_DH_PARAM_FILENAME: "{{ dhparam_file }}"
       LDAP_TLS_CIPHER_SUITE: "SECURE256:+SECURE128:-VERS-TLS-ALL:+VERS-TLS1.2:-RSA:-DHE-DSS:-CAMELLIA-128-CBC:-CAMELLIA-256-CBC"
       LDAP_TLS_ENFORCE: "true"
-      #LDAP_TLS_VERIFY_CLIENT: "demand"
+      LDAP_TLS_VERIFY_CLIENT: "allow"
     mounts: 
       - source: "{{ openldap_data_volume_name }}"
         target: "{{ openldap_data_volume_container_mount_point }}"

@@ -45,7 +45,7 @@
       default: "admin"
 
   vars:
-    # sudo to ansible user to copy public key into authorized_keys
+    # sudo to ansible user
     ansible_become: true
     ansible_become_pass: "{{ deployment_user_pass }}"
 
@@ -53,5 +53,12 @@
     ansible_user: "{{ deployment_user }}"
     ansible_ssh_private_key_file: "{{ ssh_key_file_from_vault }}.priv"
 
+    # force recreation of the secrets vault (with the open-ldap password)
+    recreate_vaults_input: 'y'
+
   roles:
+    # install openldap
     - openldap
+    # update the secrets vault with the admin password 
+    - create-secrets-vault
+

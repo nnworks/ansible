@@ -84,7 +84,7 @@ If other than standard CA certificates need to be installed on the remote hosts,
 - Generates a random password, and creates an secrets-vault.yml, encrypted with the given password. This secrets-vault will be put in the inventories/[develop|...|production]/group_vars/all_servers/. Will ask for the vault password.
 - generates a self signed CA certificate (for internal use) and a cetrtificate signed by the this CA. The keys and certificates are stored in the vault-ca-certs.yml file in the inventories/[develop|...|production]/group_vars/local directory. For the configuration of the generated certificates, please edit the conf files in /resources/[develop|...|production]/csr-configs directory to match your domain, names etc!
 
-`ansible-playbook playbooks/setup-local-user.yml -i inventories/[develop|...|production] --vault-id develop-ssh@prompt`
+`ansible-playbook playbooks/setup-local-user.yml -i inventories/[develop|...|production] --vault-id [develop|...|production]-ssh@prompt`
 
 (This step is only needed when the ~/ansible/keypairs/[develop|...|production]/ssh-key-from-vault.priv / .pub files are not present.)
 
@@ -133,6 +133,11 @@ Some LDAP basic info:
 
 DIT: Directory Information Tree, root of a tree of entries stored in ldap
 
+Show hashed passwords for the admin and config DIT:
+
+`sudo docker exec openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" dn olcRootDN olcRootPW`
+
+
 Authentication to LDAP:
 - Anonymous (no auth), normally read-only for public-facing DIT. (use ldapsearch ... -x)
 - Simple: username is DN (distinguished name) + password
@@ -140,7 +145,7 @@ Authentication to LDAP:
 
 Find the DIT root entry (using the anonymous binding):
 
-`sudo docker exec openldap ldapsearch -H ldap://localhost -x -LLL -s base -b "" namingContexts`
+`sudo docker exec openldap ldapsearch -H ldap://localhost -ZZ -x -LLL -s base -b "" namingContexts`
 
 Will return something like:
 ```  
@@ -149,11 +154,11 @@ namingContexts: dc=default,dc=nl
 ```
 Find an simpleSecurityObject (used for uname/password config) entry to bind with under the DIT looked up above (use -b to bind to a specific DIT dn). Change the dc= parts to the domain parts given during the openLDAP container installation.
 
-`sudo docker exec openldap ldapsearch -H ldap://localhost -x -LLL -b "dc=default,dc=nl" "(objectClass=simpleSecurityObject)" dn`
+`sudo docker exec openldap ldapsearch -H ldap://localhost -ZZ -x -LLL -b "dc=example,dc=com" "(objectClass=simpleSecurityObject)" dn`
 
 Will return something like:
 ```
-dn: cn=admin,dc=default,dc=nl
+dn: cn=admin,dc=example,dc=com
 ```
 
 Performing actions using the SASL/EXTERNAL authentication method (only possible from within the container):
@@ -162,11 +167,11 @@ Performing actions using the SASL/EXTERNAL authentication method (only possible 
 
 Authentication on openLDAP with username (dn) and password:
 
-`sudo docker exec --interactive openldap ldapsearch -H ldap://localhost -x -D "cn=admin,dc=default,dc=nl" -W`
+`sudo docker exec --interactive openldap ldapsearch -H ldap://localhost -ZZ -x -D "cn=admin,dc=example,dc=com" -W`
     
 or
 
-`sudo docker exec openldap ldapsearch -H ldap://localhost -x -D "cn=admin,dc=default,dc=nl" -w 1234`
+`sudo docker exec openldap ldapsearch -H ldap://localhost -ZZ -x -D "cn=admin,dc=example,dc=com" -w admin`
 
 
 Querying the current TLS certificate / key etc:
