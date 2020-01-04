@@ -6,6 +6,9 @@ current_inventory_env: "{{ inventory_dir | basename }}"
 # resource directory
 resource_dir: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}"
 
+# open ldap info file
+openldap_info_file: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}/open-ldap/info.yml"
+
 # secrets vault location
 secrets_vault_location: "{{ inventory_dir}}/group_vars/all_servers/vault-secrets.yml"
 secrets_vault_id: "{{ current_inventory_env }}-secrets"

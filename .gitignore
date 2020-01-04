@@ -7,3 +7,4 @@ resources/*/certs/*.crt
 resources/*/ca-config/index.*
 resources/*/ca-config/serial.*
 resources/*/dhparams/*.pem
+resources/test/open-ldap/info.yml

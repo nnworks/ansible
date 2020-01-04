@@ -178,7 +178,6 @@
 - set_fact:
     rootDN_dn: "{{ result.stdout_lines | select('match','^dn: .*(mdb,).*') | first }}"
     configDIT_dn: "{{ result.stdout_lines | select('match','^dn: .*(config,).*') | first }}"
-    normalDIT_dn: "{{ result.stdout_lines | select('match','^dn: .*(config,).*') | first }}"
     admin_dn: "cn=admin,{{ install_domain_dc }}" 
     openldap_admin_password_hashed: "{{ openldap_admin_password_hashed.stdout }}"
 
@@ -217,96 +216,8 @@
   become: true
   become_user: root
 
-
 - name: "Restart docker container {{ openldap_docker_container_name }}"
   docker_container:
     name: "{{ openldap_docker_container_name }}"
     state: started
     restart: true
-
-
-# - name: Set up an administrator user
-#   ldap_attr:
-#     server_uri: ldap://localhost/
-#     bind_dn: cn=admin,dc=example,dc=com
-#     dn: olcDatabase={1}hdb,cn=config
-#     name: "{{ item.key }}"
-#     values: "{{ item.value }}"
-#     state: exact
-#   with_dict:
-#     olcRootDN: "cn=admin, {{ openldap_dc_string }}"
-#     olcRootPW: "{{ hashed_password }}"
-#     olcSuffix: "{{ openldap_dc_string }}"
-
-
-#- name: Generate ldif file to change administrator suffix, roodDN and password, 
-#  template:
-#    src: templates/administrator-settings.j2
-#    dest: "{{ certkeys_vault_location }}"
-#    owner: "{{ current_user }}"
-#    mode: u=rw,g=,o=
-#  vars:
-#    hashed_password: "{{ hashed_password }}"
-#    suffix: "{{ openldap_dc_string }}"
-#    rootDN: "cn=admin, {{ openldap_dc_string }}"
-#    file_path: "{{ config_volume_path }}/custom-config/administrator-settings.ldif"
-#  loop:
-
-#- name: copy ldif to 
-#    src 
-#  vars:
-
-# - name: Make sure we have an admin user
-#   ldap_entry:
-#     dn: cn=admin,dc=example,dc=com
-#     objectClass:
-#       - simpleSecurityObject
-#       - organizationalRole
-#     attributes:
-#       description: An LDAP administrator
-#       userPassword: "{SSHA}tabyipcHzhwESzRaGA7oQ/SDoBZQOGND"
-
-# - name: Make sure we have a parent entry for users
-#   ldap_entry:
-#     dn: ou=users,dc=example,dc=com
-#     objectClass: organizationalUnit
-
-# - name: Make sure we have an admin user
-#   ldap_entry:
-#     dn: cn=admin,dc=example,dc=com
-#     objectClass:
-#       - simpleSecurityObject
-#       - organizationalRole
-#     attributes:
-#       description: An LDAP administrator
-#       userPassword: "{SSHA}tabyipcHzhwESzRaGA7oQ/SDoBZQOGND"
-
-# - name: Get rid of an old entry
-#   ldap_entry:
-#     dn: ou=stuff,dc=example,dc=com
-#     state: absent
-#     server_uri: ldap://localhost/
-#     bind_dn: cn=admin,dc=example,dc=com
-#     bind_pw: password
-
-
-# Get the specified image for OpenLDAP admin 
-#- name: Get phpldapadmin docker image
-#  docker_image: 
-#    name: "{{ openldap_admin_docker_image }}"
-#    tag: "{{ openldap_admin_docker_image_tag }}"
-#    source: pull
-
-#- name "Install PHP LDAP Admin"
-#osixia/phpldapadmin
-
-#- name: Create OpenLDAP entries
-#  block:
-#  - name: "Create OpenLDAP {{ openldap_postgres_dbuser }} account"
-#    ldap_entry:
-#      state: present
-#      server_uri: "{{ openldap_ip }}"
-#      dn: ou=users,dc=nnworks,dc=com
-#      objectClass: organizationalUnit
-#
-#  when: openldap_responding is success

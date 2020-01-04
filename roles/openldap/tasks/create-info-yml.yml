@@ -1,0 +1,22 @@
+---
+
+- name: "Create open-ldap info file directory {{ openldap_info_file | dirname }}"
+  file:
+    path: "{{ openldap_info_file | dirname }}"
+    state: directory
+    owner: "{{ current_user }}"
+    mode: u=rwx,g=,o=
+  delegate_to: localhost
+  vars:
+    ansible_become: false
+
+- name: "Create resource file with ldap info in {{ openldap_info_file }}"
+  template:
+    dest: "{{ openldap_info_file }}"
+    src: templates/ldap-info.j2
+    force: yes
+    owner: "{{ current_user }}"
+    mode: u=rw,g=,o=
+  delegate_to: localhost
+  vars:
+    ansible_become: false

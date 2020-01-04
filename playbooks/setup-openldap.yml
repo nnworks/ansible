@@ -38,7 +38,7 @@
 
     - name: openldap_admin_pass_input
       prompt: |-
-              Please give a password for the OpenLDAP administrator
+              Password for the OpenLDAP administrator
       private: true
       unsafe: true
       confirm: yes
@@ -54,7 +54,7 @@
     ansible_ssh_private_key_file: "{{ ssh_key_file_from_vault }}.priv"
 
     # force recreation of the secrets vault (with the open-ldap password)
-    recreate_vaults_input: 'y'
+    recreate_vaults_input: "y"
 
   roles:
     # install openldap
