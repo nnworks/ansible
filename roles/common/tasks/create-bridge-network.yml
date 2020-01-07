@@ -1,0 +1,6 @@
+---
+
+- name: "Create a {{ bridge_network_name }} network"
+  docker_network:
+    name: "{{ bridge_network_name }}"
+    state: present

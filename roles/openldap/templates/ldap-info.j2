@@ -1,3 +1,4 @@
-ldap_host: "{{ openldap_docker_container_name }}"
+ldap_container_name: "{{ openldap_docker_container_name }}"
+ldap_host: "{{ openldap_docker_container_hostname }}"
 ldap_dc: "{{ install_domain_dc }}"
 ldap-admin_dn: "{{ admin_dn }}"

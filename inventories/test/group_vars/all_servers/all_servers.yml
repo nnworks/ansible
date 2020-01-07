@@ -9,16 +9,19 @@
 # SSH service name
 ssh_service: sshd
 
+# Name of docker bridged network
+bridge_network_name: "InternalNet"
+
 # LVM related vars
 lvm:
   volume_groups: 
   # ubuntu os
   - name: ubuntu-vg
     physical_volumes: ["/dev/sda3"]
-    size: 5G
+    size: 10G
     volumes:
     - name: ubuntu-lv
-      size: 4G
+      size: 9G
   # docker storage
   - name: docker-vg
     physical_volumes: ["/dev/sdb"]

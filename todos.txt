@@ -1,5 +1,10 @@
 - docker postgresql is installed, but security needs attention, with pg_hba module, ssl with internal certificate?
+- force ssl to db
+- add postgres user to ldap
+- create info file for database like I did for ldap (for othewr containerts to connect to)
+
 - docker nginx on internal machine with internal certificate
 - docker nginx on external machine with LetsEncrypt certifcate
 - docker wordpress install
 
+  

@@ -185,9 +185,25 @@ TODO
 
 `ansible-playbook playbooks/setup-db.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`
 
-- Installs PostgreSQL
 - Requests whether the container should be recreated. If 'no', no update is done.
 - Requests whether the postgres-data volume for persistant data should be recreated a.k.a. deleted and created again.
+- Install PostgreSQL client (psql) on the host
+- Installs PostgreSQL docker container
+
+Get the version of the installed PostgreSQL:
+
+`psql --host=localhost --username=postgres`
+
+Set up LDAP using TLS as means to authenticate / authorize
+
+Therefore several steps are needed:
+- Copy CA certificate to docker data volume
+- Copy CA certificate to file specified by TLS_CACERT in /etc/ldap/ldap.conf (assumed to be /etc/ssl/certs/ca-certificates.crt), else TLS errors will occur because the certificate of the ldap server will not be trusted.
+- modify pg_hba.conf: add something like:
+
+```
+host    all     all     0.0.0.0/0       ldap    ldapserver="openldap-server.test.internal.nnworks.nl" ldapprefix="cn=" ldapsuffix=",dc=example,dc=com" ldaptls=1
+```
 
 
 # Help, it doesn't work

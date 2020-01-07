@@ -85,6 +85,9 @@
     tag: "{{ openldap_docker_image_tag }}"
     source: pull
 
+# Create bridge network
+- import_tasks: ../../common/tasks/create-bridge-network.yml
+
 # Create / start the container. Recreate is conditional
 - name: create openldap docker container
   docker_container:
@@ -106,8 +109,8 @@
       LDAP_TLS_KEY_FILENAME: "{{ internal_cert_priv_key_file | basename }}"
       LDAP_TLS_DH_PARAM_FILENAME: "{{ dhparam_file }}"
       LDAP_TLS_CIPHER_SUITE: "SECURE256:+SECURE128:-VERS-TLS-ALL:+VERS-TLS1.2:-RSA:-DHE-DSS:-CAMELLIA-128-CBC:-CAMELLIA-256-CBC"
-      LDAP_TLS_ENFORCE: "true"
-      LDAP_TLS_VERIFY_CLIENT: "allow"
+      LDAP_TLS_ENFORCE: "false"
+      LDAP_TLS_VERIFY_CLIENT: "try"
     mounts: 
       - source: "{{ openldap_data_volume_name }}"
         target: "{{ openldap_data_volume_container_mount_point }}"
@@ -119,6 +122,11 @@
         target: "{{ openldap_tls_volume_container_mount_point }}"
         type: volume
     hostname: "{{ openldap_docker_container_hostname }}"
+    network_mode: bridge
+    networks:
+      - name: "InternalNet"
+        aliases: "{{ openldap_docker_container_hostname }}"
+    networks_cli_compatible: yes
     exposed_ports: "{{ openldap_docker_container_exposes_ports }}"
     published_ports: "{{ openldap_docker_container_publish_ports }}"
     restart_policy: always

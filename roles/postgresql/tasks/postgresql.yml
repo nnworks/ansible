@@ -1,6 +1,6 @@
 ---
 
-# Some prerequisites
+# Some prerequisites (client etc)
 - name: Add PostgreSQL GPG apt Key
   apt_key:
     url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
@@ -54,21 +54,35 @@
   loop:
     - "{{ db_data_volume_name }}"
 
+- name: Get path to data volume for postgresql container 
+  docker_volume_info:
+    name: "{{ db_data_volume_name }}"
+  register: pgdata_volume_data
+
+- set_fact:
+    # path to postgresql data directory on host
+    pgdata_path_host: "{{ pgdata_volume_data.volume.Mountpoint }}"
+
+# Create bridge network
+- import_tasks: ../../common/tasks/create-bridge-network.yml
+
 # Get the specified image for Postgresql
-- name: get postgresql docker image
+- name: Get postgresql docker image
   docker_image: 
     name: "{{ db_docker_image }}"
     tag: "{{ db_docker_image_tag }}"
     source: pull
 
 # Create / start the container. Recreate is conditional
-- name: create postgresql docker container
+- name: Create postgresql docker container
   docker_container:
     name: "{{ db_docker_container_name }}"
     image: "{{ db_docker_image }}"
     state: started
     recreate: "{{ recreate_postgresql_container }}"
     memory: "{{ db_max_memory }}"
+    env:
+      #LDAP_ORGANISATION: "{{ openldap_organization_name_input }}"    
     mounts: 
       - source: "{{ db_data_volume_name }}"
         target: "{{ db_data_volume_container_mount_point }}"
@@ -76,17 +90,18 @@
     hostname: "{{ db_docker_container_hostname }}"
     exposed_ports: "{{ db_docker_container_exposes_ports }}"
     published_ports: "{{ db_docker_container_publish_ports }}"
+    network_mode: bridge
+    networks:
+      - name: "InternalNet"
+        aliases: "{{ db_docker_container_hostname }}"
+    networks_cli_compatible: yes    
     user: "root" # should be changed
     restart_policy: always
   register: postgresql_inspect_data
 
-- name: Store IP of Postgresql server
-  set_fact: 
-    postgres_ip: "{{ postgresql_inspect_data['ansible_facts']['docker_container']['NetworkSettings']['IPAddress'] }}"
-
-- name: "Wait for PostgreSQL @ {{ postgres_ip }} : {{ db_docker_container_exposes_ports[0] }} to respond"
+- name: "Wait for PostgreSQL @ localhost : {{ db_docker_container_exposes_ports[0] }} to respond"
   wait_for:
-    host: "{{ postgres_ip }}"
+    host: "localhost"
     port: "{{ db_docker_container_exposes_ports[0] }}"
     state: drained
     connect_timeout: 1
@@ -94,6 +109,65 @@
   register: postgres_responding
   until: postgres_responding is success
   retries: 10
+
+- name: Copy internal CA certificate to data volume directory
+  copy:
+    dest: "{{ pgdata_path_host }}"
+    src: "{{ item }}"
+    force: yes
+    mode: u=r,g=,o=
+  become: true
+  become_user: root
+  loop:
+    - "{{ cacerts_dir }}/{{ internal_cacerts_ca_file }}"
+    - "{{ certs_dir }}/{{ internal_certs_cert_file }}"
+
+- name: "Copy internal CA certificate to /etc/ssl/certs/ca-certificates.crt to enable ldaptls for ldap auth method."
+  shell: 
+    cmd: "{{ item.cmd }}" 
+  loop: 
+    - cmd: "docker exec {{ db_docker_container_name }} cp {{ db_data_volume_container_mount_point }}/{{ internal_cacerts_ca_file }} /etc/ssl/certs/ca-certificates.crt"
+    - cmd: "docker exec {{ db_docker_container_name }} chmod 644 /etc/ssl/certs/ca-certificates.crt"
+    
+- name: "Load ldap vars from file"
+  include_vars:
+    file: "{{ openldap_info_file }}"
+    name: "ldap_info"
+
+- name: "ldap info:"
+  debug: 
+    msg: "{{ ldap_info }}"
+
+- name: Remove host - all - all entry from pg_hba.conf.
+  postgresql_pg_hba:
+    dest: "{{ pgdata_path_host }}/pg_hba.conf"
+    contype: host
+    databases: all
+    users: all
+    source: "{{ item.source }}"
+    state: absent
+    create: true
+  loop:
+    - source: "127.0.0.1/32"
+    - source: "::1/128"
+
+- name: Add ldap auth method to pg_hba.conf for host - all - all.
+  postgresql_pg_hba:
+    dest: "{{ pgdata_path_host }}/pg_hba.conf"
+    contype: host
+    users: all
+    databases: all
+    source: 0.0.0.0/0
+    method: ldap
+    options: "ldapserver=\"{{ ldap_info.ldap_host }}\" ldapprefix=\"cn=\" ldapsuffix=\",{{ ldap_info.ldap_dc }}\" ldaptls=1"
+    state: present
+    create: true
+
+- name: "Restart docker container {{ db_docker_container_name }}"
+  docker_container:
+    name: "{{ db_docker_container_name }}"
+    state: started
+    restart: true
 
 #- name: Create Postgresql user
 #  block:

@@ -23,6 +23,7 @@
     vg: "{{ item[0].name }}"
     lv: "{{ item[1].name }}"
     size: "{{ item[1].size }}"
+    resizefs: true
     active: true
     shrink: "{{ 'no' if item[1].size == '100%FREE' else 'yes' }}"
     state: present
