@@ -36,10 +36,10 @@
 
 # If the volume should be recreated, stop docker postgresql container
 
-- name: "Stop docker container {{ db_docker_container_name }}"
+- name: "Stop docker container {{ postgresql_docker_container_name }}"
   docker_container:
-    name: "{{ db_docker_container_name }}"
-    image: "{{ db_docker_image }}"
+    name: "{{ postgresql_docker_container_name }}"
+    image: "{{ postgresql_docker_image }}"
     state: absent  # Remove container
     keep_volumes: false
   when: recreate_postgresql_volume == "always"
@@ -52,11 +52,11 @@
     driver: local
     recreate: "{{ recreate_postgresql_volume }}"
   loop:
-    - "{{ db_data_volume_name }}"
+    - "{{ postgresql_data_volume_name }}"
 
 - name: Get path to data volume for postgresql container 
   docker_volume_info:
-    name: "{{ db_data_volume_name }}"
+    name: "{{ postgresql_data_volume_name }}"
   register: pgdata_volume_data
 
 - set_fact:
@@ -69,40 +69,40 @@
 # Get the specified image for Postgresql
 - name: Get postgresql docker image
   docker_image: 
-    name: "{{ db_docker_image }}"
-    tag: "{{ db_docker_image_tag }}"
+    name: "{{ postgresql_docker_image }}"
+    tag: "{{ postgresql_docker_image_tag }}"
     source: pull
 
 # Create / start the container. Recreate is conditional
 - name: Create postgresql docker container
   docker_container:
-    name: "{{ db_docker_container_name }}"
-    image: "{{ db_docker_image }}"
+    name: "{{ postgresql_docker_container_name }}"
+    image: "{{ postgresql_docker_image }}"
     state: started
     recreate: "{{ recreate_postgresql_container }}"
-    memory: "{{ db_max_memory }}"
+    memory: "{{ postgresql_max_memory }}"
     env:
       #LDAP_ORGANISATION: "{{ openldap_organization_name_input }}"    
     mounts: 
-      - source: "{{ db_data_volume_name }}"
-        target: "{{ db_data_volume_container_mount_point }}"
+      - source: "{{ postgresql_data_volume_name }}"
+        target: "{{ postgresql_data_volume_container_mount_point }}"
         type: volume
-    hostname: "{{ db_docker_container_hostname }}"
-    exposed_ports: "{{ db_docker_container_exposes_ports }}"
-    published_ports: "{{ db_docker_container_publish_ports }}"
+    hostname: "{{ postgresql_docker_container_hostname }}"
+    exposed_ports: "{{ postgresql_docker_container_exposes_ports }}"
+    published_ports: "{{ postgresql_docker_container_publish_ports }}"
     network_mode: bridge
     networks:
       - name: "InternalNet"
-        aliases: "{{ db_docker_container_hostname }}"
+        aliases: "{{ postgresql_docker_container_hostname }}"
     networks_cli_compatible: yes    
     user: "root" # should be changed
     restart_policy: always
   register: postgresql_inspect_data
 
-- name: "Wait for PostgreSQL @ localhost : {{ db_docker_container_exposes_ports[0] }} to respond"
+- name: "Wait for PostgreSQL @ localhost : {{ postgresql_docker_container_exposes_ports[0] }} to respond"
   wait_for:
     host: "localhost"
-    port: "{{ db_docker_container_exposes_ports[0] }}"
+    port: "{{ postgresql_docker_container_exposes_ports[0] }}"
     state: drained
     connect_timeout: 1
     timeout: 30
@@ -126,8 +126,8 @@
   shell: 
     cmd: "{{ item.cmd }}" 
   loop: 
-    - cmd: "docker exec {{ db_docker_container_name }} cp {{ db_data_volume_container_mount_point }}/{{ internal_cacerts_ca_file }} /etc/ssl/certs/ca-certificates.crt"
-    - cmd: "docker exec {{ db_docker_container_name }} chmod 644 /etc/ssl/certs/ca-certificates.crt"
+    - cmd: "docker exec {{ postgresql_docker_container_name }} cp {{ postgresql_data_volume_container_mount_point }}/{{ internal_cacerts_ca_file }} /etc/ssl/certs/ca-certificates.crt"
+    - cmd: "docker exec {{ postgresql_docker_container_name }} chmod 644 /etc/ssl/certs/ca-certificates.crt"
     
 - name: "Load ldap vars from file"
   include_vars:
@@ -163,9 +163,9 @@
     state: present
     create: true
 
-- name: "Restart docker container {{ db_docker_container_name }}"
+- name: "Restart docker container {{ postgresql_docker_container_name }}"
   docker_container:
-    name: "{{ db_docker_container_name }}"
+    name: "{{ postgresql_docker_container_name }}"
     state: started
     restart: true
 

@@ -1,19 +1,19 @@
 ---
 
 # Postgresql image settings
-db_docker_image: postgres
-db_docker_image_tag: alpine
+postgresql_docker_image: postgres
+postgresql_docker_image_tag: alpine
 
 #Postgresql container settings
-db_docker_container_name: postgresql
-db_docker_container_hostname: postgresql-server.production.internal.nnworks.nl
-db_docker_container_exposes_ports: ["5432"]
-db_docker_container_publish_ports: ["5432:5432"]
-db_max_memory: null
+postgresql_docker_container_name: postgresql
+postgresql_docker_container_hostname: postgresql-server.production.internal.nnworks.nl
+postgresql_docker_container_exposes_ports: ["5432"]
+postgresql_docker_container_publish_ports: ["5432:5432"]
+postgresql_max_memory: null
 
 # Postgresql data / config volume settings
-db_data_volume_name: postgresql-data
-db_data_volume_container_mount_point: /var/lib/postgresql/data
+postgresql_data_volume_name: postgresql-data
+postgresql_data_volume_container_mount_point: /var/lib/postgresql/data
 
 # Postgresql settings for general setup
 db_postgres_dbname: postgres
