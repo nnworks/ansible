@@ -63,9 +63,6 @@
     # path to postgresql data directory on host
     pgdata_path_host: "{{ pgdata_volume_data.volume.Mountpoint }}"
 
-# Create bridge network
-- import_tasks: ../../common/tasks/create-bridge-network.yml
-
 # Get the specified image for Postgresql
 - name: Get postgresql docker image
   docker_image: 
@@ -159,7 +156,7 @@
     databases: all
     source: 0.0.0.0/0
     method: ldap
-    options: "ldapserver=\"{{ ldap_info.ldap_host }}\" ldapprefix=\"cn=\" ldapsuffix=\",{{ ldap_info.ldap_dc }}\" ldaptls=1"
+    options: "ldapserver=\"{{ ldap_info.ldap_host }}\" ldapprefix=\"cn=\" ldapsuffix=\",ou=users,{{ ldap_info.ldap_dc }}\" ldaptls=1"
     state: present
     create: true
 

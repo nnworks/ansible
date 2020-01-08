@@ -1,2 +1,25 @@
 ---
 
+# Create hash of the admin (postgres) password.
+- name: Generate password for administrator user
+  shell: 
+    cmd: "docker exec openldap slappasswd -s '{{ postgresql_postgres_password }}'"
+  register: postgresql_postgres_password_hashed
+
+- set_fact:
+    postgresql_postgres_password_hashed: "{{ postgresql_postgres_password_hashed.stdout }}"
+
+- name: "Create postgres user in LDAP"
+  ldap_entry:
+    server_uri: "ldap://{{ openldap_docker_container_hostname }}:389"
+    bind_dn: "cn=admin,{{ ldap_info.ldap_dc }}"
+    bind_pw: "{{ openldap_admin_password }}"
+    start_tls: true
+    state: present
+    dn: "cn=postgres,ou=users,{{ ldap_info.ldap_dc }}"
+    objectClass:       
+      - simpleSecurityObject
+      - organizationalRole
+    attributes:
+      description: PostgreSQL administrator user
+      userPassword: "{{ postgresql_postgres_password_hashed }}"

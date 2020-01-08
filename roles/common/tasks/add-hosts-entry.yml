@@ -1,0 +1,13 @@
+---
+
+# This task needs vars:
+# host_name: name of the host to add
+# host_ip: ip to direct to when the host_name is looked up
+
+- name: "Update the /etc/hosts file with the host / IP combo {{ host_name }} / {{ host_ip }}"
+  lineinfile:
+    path: "/etc/hosts"
+    regexp: ".*{{ host_name }}.*$"
+    line: "{{ host_ip }} {{ host_name }}"
+    state: present
+    backup: yes

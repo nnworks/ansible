@@ -1,5 +1,11 @@
 ---
 
+- import_tasks: ../../common/tasks/create-bridge-network.yml
+# add hostname of the ldap container to the hosts table
+- import_tasks: ../../common/tasks/add-hosts-entry.yml
+  vars:
+    host_ip: 127.0.0.1
+    host_name: "{{ postgresql_docker_container_hostname }}"
 - import_tasks: postgresql.yml
 - import_tasks: create-roles-ldap-entries.yml
 - import_tasks: create-info-yml.yml

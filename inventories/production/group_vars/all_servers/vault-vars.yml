@@ -1,3 +1,4 @@
 # value from vault (if present)
 deployment_user_pass: "{{ vault_deployment_user_pass | default('') }}"
-openldap_admin_password: "{{ (vault_openldap_admin_password == '') | ternary(openldap_admin_pass_input, vault_openldap_admin_password, omit) }}"
+openldap_admin_password: "{{ ((vault_openldap_admin_password | default('')) == '') | ternary(openldap_admin_pass_input | default(''), vault_openldap_admin_password, omit) }}"
+postgresql_postgres_password: "{{ ((vault_postgresql_postgres_password | default('')) == '') | ternary(postgresql_postgres_pass_input | default(''), vault_postgresql_postgres_password, omit) }}"

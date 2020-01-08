@@ -137,7 +137,6 @@ Show hashed passwords for the admin and config DIT:
 
 `sudo docker exec openldap ldapsearch -H ldapi:// -LLL -Q -Y EXTERNAL -b "cn=config" "(olcRootDN=*)" dn olcRootDN olcRootPW`
 
-
 Authentication to LDAP:
 - Anonymous (no auth), normally read-only for public-facing DIT. (use ldapsearch ... -x)
 - Simple: username is DN (distinguished name) + password
@@ -152,7 +151,8 @@ Will return something like:
 dn
 namingContexts: dc=default,dc=nl
 ```
-Find an simpleSecurityObject (used for uname/password config) entry to bind with under the DIT looked up above (use -b to bind to a specific DIT dn). Change the dc= parts to the domain parts given during the openLDAP container installation.
+
+Find a simpleSecurityObject (used for uname/password config) entry to bind with under the DIT looked up above (use -b to bind to a specific DIT dn). Change the dc= parts to the domain parts given during the openLDAP container installation.
 
 `sudo docker exec openldap ldapsearch -H ldap://localhost -ZZ -x -LLL -b "dc=example,dc=com" "(objectClass=simpleSecurityObject)" dn`
 
@@ -160,6 +160,7 @@ Will return something like:
 ```
 dn: cn=admin,dc=example,dc=com
 ```
+
 
 Performing actions using the SASL/EXTERNAL authentication method (only possible from within the container):
 
@@ -177,9 +178,7 @@ or
 Querying the current TLS certificate / key etc:
 `sudo docker exec --interactive openldap ldapsearch -H ldapi:// -Y EXTERNAL -b cn=config '(|(olcTLSCertificateFile=*)(olcTLSCertificateKeyFile=*)(olcTLSCipherSuite=*))' olcTLSCertificateFile olcTLSCertificateKeyFile olcTLSCipherSuite olcTLSProtocolMin`
 
-Modifying openLDAP settings in the Config DIT:
-TODO
-
+TODO info about what is done (endstate)
 
 ## 3) Remote installation of a PostgreSQL database.
 
@@ -202,9 +201,10 @@ Therefore several steps are needed:
 - modify pg_hba.conf: add something like:
 
 ```
-host    all     all     0.0.0.0/0       ldap    ldapserver="openldap-server.test.internal.nnworks.nl" ldapprefix="cn=" ldapsuffix=",dc=example,dc=com" ldaptls=1
+host    all     all     0.0.0.0/0       ldap    ldapserver="openldap-server.test.internal.nnworks.nl" ldapprefix="cn=" ldapsuffix=",ou=users,dc=example,dc=com" ldaptls=1
 ```
 
+TODO more information about what is done (endstate)
 
 # Help, it doesn't work
 

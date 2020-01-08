@@ -85,9 +85,6 @@
     tag: "{{ openldap_docker_image_tag }}"
     source: pull
 
-# Create bridge network
-- import_tasks: ../../common/tasks/create-bridge-network.yml
-
 # Create / start the container. Recreate is conditional
 - name: create openldap docker container
   docker_container:
@@ -160,7 +157,7 @@
     state: directory
     path: "{{ custom_config_path_host }}"
 
-- name: change owner of cutom-config directory, private key, certificate and dhparams to openldap
+- name: change owner of custom-config directory, private key, certificate and dhparams to openldap
   shell: "docker container exec {{ openldap_docker_container_name }} chown openldap:openldap {{ item }}"
   loop:
     - "{{ custom_config_path_container }}"

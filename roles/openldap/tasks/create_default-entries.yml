@@ -1,0 +1,11 @@
+---
+
+- name: Create parent entry for users
+  ldap_entry:
+    server_uri: "ldap://{{ openldap_docker_container_hostname }}:389"
+    bind_dn: "cn=admin,{{ install_domain_dc }}"
+    bind_pw: "{{ openldap_admin_password }}"
+    start_tls: true
+    state: present
+    dn: "ou=users,{{ install_domain_dc }}"
+    objectClass: organizationalUnit
