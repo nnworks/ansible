@@ -106,7 +106,7 @@
       LDAP_TLS_KEY_FILENAME: "{{ internal_cert_priv_key_file | basename }}"
       LDAP_TLS_DH_PARAM_FILENAME: "{{ dhparam_file }}"
       LDAP_TLS_CIPHER_SUITE: "SECURE256:+SECURE128:-VERS-TLS-ALL:+VERS-TLS1.2:-RSA:-DHE-DSS:-CAMELLIA-128-CBC:-CAMELLIA-256-CBC"
-      LDAP_TLS_ENFORCE: "false"
+      LDAP_TLS_ENFORCE: "true"
       LDAP_TLS_VERIFY_CLIENT: "try"
     mounts: 
       - source: "{{ openldap_data_volume_name }}"
@@ -166,9 +166,7 @@
     - "{{ openldap_tls_volume_container_mount_point }}/{{ internal_cert_priv_key_file | basename }}"
     - "{{ openldap_tls_volume_container_mount_point }}/{{ dhparam_file }}"
     
-
-# Create hash of the admin password.
-- name: Generate password for administrator user
+- name: Generate password hash for administrator user
   shell: 
     cmd: "docker exec openldap slappasswd -s '{{ openldap_admin_password }}'"
   register: openldap_admin_password_hashed
@@ -186,8 +184,7 @@
     admin_dn: "cn=admin,{{ install_domain_dc }}" 
     openldap_admin_password_hashed: "{{ openldap_admin_password_hashed.stdout }}"
 
-# Change default settings. Keep the empty lines between the ldiff input blocks!
-- name: Change RootDN admin password, olcSuffix and olcRootDN
+- name: Change RootDN admin password
   shell: |
       docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldapi:// -Y EXTERNAL <<EOF
       {{ rootDN_dn }}
@@ -209,7 +206,6 @@
   become: true
   become_user: root
 
-# Change default settings. Keep the empty lines between the ldiff input blocks!
 - name: Change Normal DIT admin password
   shell: |
       docker exec --interactive {{ openldap_docker_container_name }} ldapmodify -H ldaps://localhost -x -D {{ admin_dn }} -w {{ openldap_admin_password }} <<EOF

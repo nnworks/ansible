@@ -172,28 +172,47 @@ Authentication on openLDAP with username (dn) and password:
     
 or
 
-`sudo docker exec openldap ldapsearch -H ldap://localhost -ZZ -x -D "cn=admin,dc=example,dc=com" -w admin`
+`sudo docker exec openldap ldapsearch -H ldap://localhost -ZZ -x -D "cn=admin,dc=example,dc=com" -w [password]]`
 
 
 Querying the current TLS certificate / key etc:
 `sudo docker exec --interactive openldap ldapsearch -H ldapi:// -Y EXTERNAL -b cn=config '(|(olcTLSCertificateFile=*)(olcTLSCertificateKeyFile=*)(olcTLSCipherSuite=*))' olcTLSCertificateFile olcTLSCertificateKeyFile olcTLSCipherSuite olcTLSProtocolMin`
 
-TODO info about what is done (endstate)
+
+To install the open-ldap container, run:
+
+`ansible-playbook playbooks/setup-openldap.yml -i inventories/[develop|...|production]/ --vault-id [develop|...|production]-ssh@prompt`
+
+This will install the latest osixia/openldap image:
+- Data, config and tls volumes are created
+- TLS is enabled and required. The 'internal' certificate and keys are configured. Client certificate verification is set to 'try'
+- mdb is used as database
+- The default ports are published
+- The RootDN DIT and config DIT paswords are set
+- The domain and organization are set to the provided values
+- The baseDN is derived from the domain (dc=...,dc=...,...)
+- An Organizational Unit 'users' is created
+- A yaml file is created in the openldap resource folder containg the hostname of the server, container name, dc parts and the admin dn
+- the hostname of the docker container is adde to the /etc/hosts table of the host.
 
 ## 3) Remote installation of a PostgreSQL database.
 
-`ansible-playbook playbooks/setup-db.yml -i inventories/[develop|...|production] --vault-id secrets-ssh@prompt`
+`ansible-playbook playbooks/setup-postgresql.yml -i inventories/[develop|...|production]/ --vault-id [develop|...|production]-ssh@prompt`
 
 - Requests whether the container should be recreated. If 'no', no update is done.
 - Requests whether the postgres-data volume for persistant data should be recreated a.k.a. deleted and created again.
 - Install PostgreSQL client (psql) on the host
 - Installs PostgreSQL docker container
+- Configures ldap as auth method (targetting the above described ldap container)
+- Adds a postgres user to the ldap ou=users unit, with the specified password.
+- TODO: configures ssl with the internal certificate and keys
+- the hostname of the docker container is adde to the /etc/hosts table of the host.
 
 Get the version of the installed PostgreSQL:
 
 `psql --host=localhost --username=postgres`
 
-Set up LDAP using TLS as means to authenticate / authorize
+For setting up LDAP using TLS as means to authenticate / authorize (automatically done by the script):
 
 Therefore several steps are needed:
 - Copy CA certificate to docker data volume
@@ -204,7 +223,8 @@ Therefore several steps are needed:
 host    all     all     0.0.0.0/0       ldap    ldapserver="openldap-server.test.internal.nnworks.nl" ldapprefix="cn=" ldapsuffix=",ou=users,dc=example,dc=com" ldaptls=1
 ```
 
-TODO more information about what is done (endstate)
+
+
 
 # Help, it doesn't work
 
