@@ -2,6 +2,10 @@
 ssh_priv: "{{ vault_ssh_priv }}"
 ssh_pub: "{{ vault_ssh_pub }}"
 int_ca_cert: "{{ vault_int_cacert }}"
+int_ca_cert_pub: "{{ vault_int_cacert_pub }}"
+int_ca_cert_priv: "{{ vault_int_cacert_priv }}"
 int_cert: "{{ vault_int_cert }}"
+int_cert_pub: "{{ vault_int_cert_pub }}"
+int_cert_priv: "{{ vault_int_cert_priv }}"
 dhparam: "{{ vault_dhparam }}"
 

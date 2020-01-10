@@ -4,15 +4,17 @@
   file:
     path: "{{ cacerts_dir }}"
     state: directory
+    owner: "{{ current_user }}"
     mode: u=rwx,g=,o=
 
 - name: Write internal CA certificate to resources directory
   template:
     src: templates/int-cert-template.j2
     dest: "{{ cacerts_dir }}/{{ internal_cacerts_ca_file }}"
-    owner: "{{ current_user }}"
     lstrip_blocks: true
     trim_blocks: false
+    state: present
+    owner: "{{ current_user }}"
     mode: u=rw,g=,o=
   vars: 
     cert_data: "{{ int_ca_cert }}"
@@ -21,15 +23,17 @@
   file:
     path: "{{ certs_dir }}"
     state: directory
+    owner: "{{ current_user }}"
     mode: u=rwx,g=,o=
 
 - name: Write certificate signed by internal CA certificate to resources directory
   template:
     src: templates/int-cert-template.j2
     dest: "{{ certs_dir }}/{{ internal_certs_cert_file }}"
-    owner: "{{ current_user }}"
     lstrip_blocks: true
     trim_blocks: false
+    state: present
+    owner: "{{ current_user }}"
     mode: u=rw,g=,o=
   vars: 
     cert_data: "{{ int_cert }}"
@@ -38,15 +42,17 @@
   file:
     path: "{{ dhparams_dir }}"
     state: directory
+    owner: "{{ current_user }}"
     mode: u=rwx,g=,o=
 
 - name: Write dhparam.pem to resources directory
   template:
     src: templates/dhparam-template.j2
     dest: "{{ dhparams_dir }}/{{ dhparam_file }}"
-    owner: "{{ current_user }}"
     lstrip_blocks: true
     trim_blocks: false
+    state: present
+    owner: "{{ current_user }}"
     mode: u=rw,g=,o=
   vars: 
     dhparam_data: "{{ dhparam }}"

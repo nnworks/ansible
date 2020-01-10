@@ -205,8 +205,8 @@ This will install the latest osixia/openldap image:
 - Installs PostgreSQL docker container
 - Configures ldap as auth method (targetting the above described ldap container)
 - Adds a postgres user to the ldap ou=users unit, with the specified password.
-- TODO: configures ssl with the internal certificate and keys
-- the hostname of the docker container is adde to the /etc/hosts table of the host.
+- Configures ssl with the internal certificate and keys
+- The hostname of the docker container is added to the /etc/hosts table of the host.
 
 Get the version of the installed PostgreSQL:
 
@@ -221,6 +221,18 @@ Therefore several steps are needed:
 
 ```
 host    all     all     0.0.0.0/0       ldap    ldapserver="openldap-server.test.internal.nnworks.nl" ldapprefix="cn=" ldapsuffix=",ou=users,dc=example,dc=com" ldaptls=1
+```
+
+To check the ssl connection to the PostgreSQL server, use
+`psql --host=localhost --port=5432 --username=postgres`.
+
+It should return something like:
+```
+psql (12.1 (Ubuntu 12.1-1.pgdg18.04+1))
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+Type "help" for help.
+
+postgres=#
 ```
 
 

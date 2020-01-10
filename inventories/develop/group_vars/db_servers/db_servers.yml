@@ -6,7 +6,7 @@ postgresql_docker_image_tag: alpine
 
 #Postgresql container settings
 postgresql_docker_container_name: postgresql
-postgresql_docker_container_hostname: postgresql-server.develop.internal.nnworks.nl
+postgresql_docker_container_hostname: postgresql-server.test.internal.nnworks.nl
 postgresql_docker_container_exposes_ports: ["5432"]
 postgresql_docker_container_publish_ports: ["5432:5432"]
 postgresql_max_memory: null
@@ -15,6 +15,10 @@ postgresql_max_memory: null
 postgresql_data_volume_name: postgresql-data
 postgresql_data_volume_container_mount_point: /var/lib/postgresql/data
 
+# Postgresql SSL / TLS volume settings
+postgresql_ssl_tls_volume_name: postgresql-ssl-tls
+postgresql_ssl_tls_volume_container_mount_point: /etc/postgresql/ssl_tls
+
 # Postgresql settings for general setup
 db_postgres_dbname: postgres
 db_postgres_dbuser: postgres1
@@ -22,5 +26,5 @@ db_postgres_password: "12345"
 
 # Deployment hints
 recreate_postgresql_container: "{{'yes' if recreate_postgresql_container_input | lower is match('y|yes') else 'no'}}"
-recreate_postgresql_volume: "{{'always' if recreate_postgresql_volume_input | lower is match('y|yes') else 'never'}}"
+recreate_postgresql_volumes: "{{'always' if recreate_postgresql_volumes_input | lower is match('y|yes') else 'never'}}"
 

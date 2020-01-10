@@ -1,4 +1,9 @@
 ---
 
+# Writes the internal CA and CA-signed certificate to the resource directory
+# Writes the private and public keys to the current user's home's cert stuff directory (should not linger around in the ansible directory)
+
 - import_tasks: write-int-certs-dhparam.yml 
+
+- import_tasks: write_pub-priv-keys.yml
   

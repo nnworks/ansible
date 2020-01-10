@@ -6,10 +6,20 @@ current_inventory_env: "{{ inventory_dir | basename }}"
 # resource directory
 resource_dir: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}"
 
-# ldap info file
-openldap_info_file: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}/openldap/info.yml"
-# postgres info file
-postgresql_info_file: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}/postgresql/info.yml"
+# ca keypair and certificates
+certs_stuff_location: "{{ current_user_home }}/ansible/ssl/certs/{{ current_inventory_env }}"
+
+# Current user is used for initial ssh connection.
+ssh_user: "{{ current_user }}"
+
+# keypair settings (key will only be here during setup of authentication for host)
+ssh_keypair_location: "{{ current_user_home }}/ansible/ssl/keypairs/{{ current_inventory_env }}"
+
+# ca keypair and certificates
+dhparam_location: "{{ current_user_home }}/ansible/ssl/dhparam/{{ current_inventory_env }}"
+
+# private key location for key authentication ()
+ssh_key_file_from_vault: "{{ ssh_keypair_location }}/ssh-key-from-vault"
 
 # secrets vault location
 secrets_vault_location: "{{ inventory_dir}}/group_vars/all_servers/vault-secrets.yml"
@@ -24,12 +34,26 @@ ca_certs: "{{ query('fileglob', cacerts_dir + '/*.crt') }}"
 # name of internal CA and CA signed certificate (how it ends up in the resources/cacerts directory)
 internal_cacerts_ca_file: "internal-ca.crt"
 internal_certs_cert_file: "internal-cert.crt"
+internal_cacerts_pub_file: "{{ current_inventory_env }}-int-ca-key-pub.pem"
+internal_cacerts_priv_file: "{{ current_inventory_env }}-int-ca-key-priv.pem"
+internal_certs_pub_file: "{{ current_inventory_env }}-int-cert-key-pub.pem"
+internal_certs_priv_file: "{{ current_inventory_env }}-int-cert-key-priv.pem"
 dhparam_file: "dhparam.pem"
 
 # Paths of internal certificate (signed by above CA) and private/public key files. 
-# These are not present in resources dir (for security reasons is it only present in the ~/ansible user)
-internal_cert_priv_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key-priv.pem"
-internal_cert_pub_key_file: "{{ certs_stuff_location }}/{{ current_inventory_env }}-int-cert-key-pub.pem"
+# These are not present in resources dir (for security reasons is it only present in the ~/ansible directory)
+internal_ca_priv_key_file: "{{ certs_stuff_location }}/{{ internal_cacerts_priv_file }}"
+internal_ca_pub_key_file: "{{ certs_stuff_location }}/{{ internal_cacerts_pub_file }}"
+
+# Paths of internal certificate (signed by above CA) and private/public key files. 
+# These are not present in resources dir (for security reasons is it only present in the ~/ansible directory)
+internal_cert_priv_key_file: "{{ certs_stuff_location }}/{{ internal_certs_priv_file }}"
+internal_cert_pub_key_file: "{{ certs_stuff_location }}/{{ internal_certs_pub_file }}"
+
+# ldap info file
+openldap_info_file: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}/openldap/info.yml"
+# postgres info file
+postgresql_info_file: "{{ inventory_dir }}/../../resources/{{ current_inventory_env }}/postgresql/info.yml"
 
 # Current user is used for initial ssh connection.
 current_user: "{{ lookup('env','USER') }}"
@@ -39,19 +63,4 @@ current_user_home: "{{ lookup('env','HOME') }}"
 deployment_user: ansible
 # Groups of the deployment user.
 deployment_user_groups: sudo
-
-# Current user is used for initial ssh connection.
-ssh_user: "{{ current_user }}"
-
-# keypair settings (key will only be here during setup of authentication for host)
-ssh_keypair_location: "{{ current_user_home }}/ansible/ssl/keypairs/{{ current_inventory_env }}"
-
-# ca keypair and certificates
-certs_stuff_location: "{{ current_user_home }}/ansible/ssl/certs/{{ current_inventory_env }}"
-
-# ca keypair and certificates
-dhparam_location: "{{ current_user_home }}/ansible/ssl/dhparam/{{ current_inventory_env }}"
-
-# private key location for key authentication ()
-ssh_key_file_from_vault: "{{ ssh_keypair_location }}/ssh-key-from-vault"
 

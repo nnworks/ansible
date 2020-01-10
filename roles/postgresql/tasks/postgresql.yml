@@ -34,7 +34,7 @@
 # Create volume for postgresql data
 # Create postgres application container
 
-# If the volume should be recreated, stop docker postgresql container
+# If the volumes should be recreated, stop docker postgresql container
 
 - name: "Stop docker container {{ postgresql_docker_container_name }}"
   docker_container:
@@ -42,7 +42,7 @@
     image: "{{ postgresql_docker_image }}"
     state: absent  # Remove container
     keep_volumes: false
-  when: recreate_postgresql_volume == "always"
+  when: recreate_postgresql_volumes == "always"
 
 # (Re)Create the volumes
 - name: Create volumes for postgres
@@ -50,18 +50,43 @@
     name: "{{ item }}"
     state: present
     driver: local
-    recreate: "{{ recreate_postgresql_volume }}"
+    recreate: "{{ recreate_postgresql_volumes }}"
   loop:
     - "{{ postgresql_data_volume_name }}"
+    - "{{ postgresql_ssl_tls_volume_name }}"
 
 - name: Get path to data volume for postgresql container 
   docker_volume_info:
     name: "{{ postgresql_data_volume_name }}"
-  register: pgdata_volume_data
+  register: pg_data_volume_data
+
+- name: Get path to SSL / TLS volume for postgresql container 
+  docker_volume_info:
+    name: "{{ postgresql_ssl_tls_volume_name }}"
+  register: pg_ssl_tls_volume_data
 
 - set_fact:
     # path to postgresql data directory on host
-    pgdata_path_host: "{{ pgdata_volume_data.volume.Mountpoint }}"
+    pg_data_path_host: "{{ pg_data_volume_data.volume.Mountpoint }}"
+    # path to postgresql data directory on host
+    pg_ssl_tls_path_host: "{{ pg_ssl_tls_volume_data.volume.Mountpoint }}"
+
+- name: Copy internal CA certificate to ssl_tls volume directory
+  copy:
+    dest: "{{ pg_ssl_tls_path_host }}"
+    src: "{{ item }}"
+    force: yes
+    mode: u=rw,g=,o=
+    owner: "999"
+  become: true
+  become_user: root
+  loop:
+    # Internal CA and CA issued certificate
+    - "{{ cacerts_dir }}/{{ internal_cacerts_ca_file }}"
+    - "{{ certs_dir }}/{{ internal_certs_cert_file }}"
+    # Internal CA issued certificate private and public key
+    - "{{ internal_cert_pub_key_file }}"
+    - "{{ internal_cert_priv_key_file }}"
 
 # Get the specified image for Postgresql
 - name: Get postgresql docker image
@@ -78,11 +103,16 @@
     state: started
     recreate: "{{ recreate_postgresql_container }}"
     memory: "{{ postgresql_max_memory }}"
-    env:
-      #LDAP_ORGANISATION: "{{ openldap_organization_name_input }}"    
+    command:
+      - "-c ssl=on"
+      - "-c ssl_cert_file={{ postgresql_ssl_tls_volume_container_mount_point }}/{{ internal_certs_cert_file }}"
+      - "-c ssl_key_file={{ postgresql_ssl_tls_volume_container_mount_point }}/{{ internal_certs_priv_file }}"
     mounts: 
       - source: "{{ postgresql_data_volume_name }}"
         target: "{{ postgresql_data_volume_container_mount_point }}"
+        type: volume
+      - source: "{{ postgresql_ssl_tls_volume_name }}"
+        target: "{{ postgresql_ssl_tls_volume_container_mount_point }}"
         type: volume
     hostname: "{{ postgresql_docker_container_hostname }}"
     exposed_ports: "{{ postgresql_docker_container_exposes_ports }}"
@@ -92,7 +122,7 @@
       - name: "InternalNet"
         aliases: "{{ postgresql_docker_container_hostname }}"
     networks_cli_compatible: yes    
-    user: "root" # should be changed
+    user: "root"
     restart_policy: always
   register: postgresql_inspect_data
 
@@ -107,24 +137,28 @@
   until: postgres_responding is success
   retries: 10
 
-- name: Copy internal CA certificate to data volume directory
-  copy:
-    dest: "{{ pgdata_path_host }}"
-    src: "{{ item }}"
-    force: yes
-    mode: u=r,g=,o=
+- name: "Change ownership and rights of certificates and keys."
+  shell: 
+    cmd: |
+         docker exec {{ postgresql_docker_container_name }} chmod 600 {{ item }}
+         docker exec {{ postgresql_docker_container_name }} chown postgres:postgres {{ item }}
   become: true
   become_user: root
-  loop:
-    - "{{ cacerts_dir }}/{{ internal_cacerts_ca_file }}"
-    - "{{ certs_dir }}/{{ internal_certs_cert_file }}"
+  loop: 
+    - "{{ postgresql_ssl_tls_volume_container_mount_point }}/{{ internal_cacerts_ca_file }}"
+    - "{{ postgresql_ssl_tls_volume_container_mount_point }}/{{ internal_certs_cert_file }}"
+    - "{{ postgresql_ssl_tls_volume_container_mount_point }}/{{ internal_certs_pub_file }}"
+    - "{{ postgresql_ssl_tls_volume_container_mount_point }}/{{  internal_certs_priv_file}}"
 
 - name: "Copy internal CA certificate to /etc/ssl/certs/ca-certificates.crt to enable ldaptls for ldap auth method."
   shell: 
     cmd: "{{ item.cmd }}" 
+  become: true
+  become_user: root
   loop: 
-    - cmd: "docker exec {{ postgresql_docker_container_name }} cp {{ postgresql_data_volume_container_mount_point }}/{{ internal_cacerts_ca_file }} /etc/ssl/certs/ca-certificates.crt"
-    - cmd: "docker exec {{ postgresql_docker_container_name }} chmod 644 /etc/ssl/certs/ca-certificates.crt"
+    - cmd: "docker exec {{ postgresql_docker_container_name }} cp {{ postgresql_ssl_tls_volume_container_mount_point }}/{{ internal_cacerts_ca_file }} /etc/ssl/certs/ca-certificates.crt"
+    - cmd: "docker exec {{ postgresql_docker_container_name }} chmod 777 /etc/ssl/certs/ca-certificates.crt"
+    - cmd: "docker exec {{ postgresql_docker_container_name }} chown root:root /etc/ssl/certs/ca-certificates.crt"
     
 - name: "Load ldap vars from file"
   include_vars:
@@ -137,7 +171,7 @@
 
 - name: Remove host - all - all entry from pg_hba.conf.
   postgresql_pg_hba:
-    dest: "{{ pgdata_path_host }}/pg_hba.conf"
+    dest: "{{ pg_data_path_host }}/pg_hba.conf"
     contype: host
     databases: all
     users: all
@@ -150,7 +184,7 @@
 
 - name: Add ldap auth method to pg_hba.conf for host - all - all.
   postgresql_pg_hba:
-    dest: "{{ pgdata_path_host }}/pg_hba.conf"
+    dest: "{{ pg_data_path_host }}/pg_hba.conf"
     contype: host
     users: all
     databases: all
@@ -160,21 +194,8 @@
     state: present
     create: true
 
-- name: "Restart docker container {{ postgresql_docker_container_name }}"
+- name: "Stop docker container {{ postgresql_docker_container_name }}"
   docker_container:
     name: "{{ postgresql_docker_container_name }}"
     state: started
     restart: true
-
-#- name: Create Postgresql user
-#  block:
-#  - name: "Create Postgresql {{ db_postgres_dbuser }} account"
-#    postgresql_user:
-#      encrypted: true
-#      login_host: "{{ postgres_ip }}"
-#      login_user: "postgres"
-#      db: "{{ db_postgres_dbname }}"
-#      name: "{{ db_postgres_dbuser }}"
-#      password: "{{ db_postgres_password }}"
-#
-#  when: postgres_responding is success

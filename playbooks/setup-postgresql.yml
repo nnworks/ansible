@@ -11,7 +11,7 @@
       unsafe: true
       default: "n"
 
-    - name: recreate_postgresql_volume_input
+    - name: recreate_postgresql_volumes_input
       prompt: |-
               Recreate PostgreSQL volumes (you will loose persistent data / logging, and container will be recreated!)?
       private: false
@@ -42,4 +42,4 @@
   roles:
     - postgresql
     # update the secrets vault with the postgres password 
-    - create-secrets-vault
+    #- create-secrets-vault

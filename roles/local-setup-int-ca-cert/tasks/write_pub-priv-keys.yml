@@ -1,0 +1,25 @@
+---
+
+- name: Create directory in resource tree for ca certificates
+  file:
+    path: "{{ internal_cert_priv_key_file | basename }}"
+    state: directory
+    owner: "{{ current_user }}"
+    mode: u=rwx,g=,o=
+
+- name: Write internal CA certificate to resources directory
+  template:
+    src: templates/int-keys-template.j2
+    dest: "{{ item.dest }}"
+    owner: "{{ current_user }}"
+    lstrip_blocks: true
+    trim_blocks: false
+    state: present
+    mode: u=rw,g=,o=
+  vars: 
+    key_data: "{{ item.key_data }}"
+  loop:
+    - dest: "{{ internal_cert_priv_key_file }}"
+      key_data: "{{ int_ca_cert_pub }}"
+    - dest: "{{ internal_cert_pub_key_file }}"
+      key_data: "{{ int_ca_cert_priv }}"
