@@ -1,0 +1,8 @@
+---
+
+- name: Install some handy packages
+  apt: 
+    name: "{{ item }}" 
+    state: latest 
+  loop:
+    - nmon

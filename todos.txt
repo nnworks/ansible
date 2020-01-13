@@ -1,6 +1,5 @@
-- docker postgresql is installed, but security needs attention, with pg_hba module, ssl with internal certificate?
-- force ssl to db
-- add postgres user to ldap
+- lvm sizes/volumes depend on machine, so should not be in all_server, but in host_vars, per machine
+=> splitted vars, but need to update them according to the production machines
 
 - docker nginx on internal machine with internal certificate
 - docker nginx on external machine with LetsEncrypt certifcate
